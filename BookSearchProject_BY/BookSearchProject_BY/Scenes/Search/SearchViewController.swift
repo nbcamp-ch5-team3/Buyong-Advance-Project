@@ -7,7 +7,11 @@
 
 import UIKit
 
+import SnapKit
+
 class SearchViewController: UIViewController {
+    
+    private let searchView = SearchView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -15,6 +19,13 @@ class SearchViewController: UIViewController {
     }
     
     private func setup() {
-        view.backgroundColor = .systemBackground
+        view.addSubview(searchView)
+        setupConstraints()
+    }
+    
+    private func setupConstraints() {
+        searchView.snp.makeConstraints { make in
+            make.top.bottom.leading.trailing.equalToSuperview()
+        }
     }
 }
