@@ -7,7 +7,11 @@
 
 import UIKit
 
+import SnapKit
+
 class SavedBooksViewController: UIViewController {
+    
+    private let savedBooksView = SavedBooksView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -15,6 +19,13 @@ class SavedBooksViewController: UIViewController {
     }
     
     private func setup() {
-        view.backgroundColor = .systemBackground
+        view.addSubview(savedBooksView)
+        setupConstraints()
+    }
+    
+    private func setupConstraints() {
+        savedBooksView.snp.makeConstraints { make in
+            make.top.bottom.leading.trailing.equalToSuperview()
+        }
     }
 }
