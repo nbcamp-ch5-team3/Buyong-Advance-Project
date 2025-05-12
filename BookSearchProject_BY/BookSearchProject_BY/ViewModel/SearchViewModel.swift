@@ -26,7 +26,7 @@ class SearchViewModel {
         let url = "https://dapi.kakao.com/v3/search/book?query=\(queryEncoded)"
         
         let headers: HTTPHeaders = [
-            "Authorization": "KaKaoAK \(apiKey)"
+            "Authorization": "KakaoAK \(apiKey)"
         ]
         
         NetworkManager.shared.fetch(url: url, headers: headers)

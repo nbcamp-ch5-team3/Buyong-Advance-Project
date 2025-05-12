@@ -10,9 +10,22 @@ import UIKit
 import SnapKit
 import Then
 
+protocol SearchViewDelegate: AnyObject {
+    func searchView(_ searchView: SearchView, didSearch text: String)
+}
+
 final class SearchView: UIView {
     
-    private let searchBar = UISearchBar().then {
+    weak var delegate: SearchViewDelegate?
+    
+    // 책 목록이 바뀌면 검색 결과 부분만 새로고침(View 내부에서 UI 새로고침)
+    var searchResults: [Book] = [] {
+        didSet {
+            collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
+        }
+    }
+    
+    private var searchBar = UISearchBar().then {
         $0.placeholder = "검색어를 입력하세요"
         $0.searchTextField.backgroundColor = .secondarySystemBackground
         $0.searchBarStyle = .minimal
@@ -25,8 +38,8 @@ final class SearchView: UIView {
     }
     
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
-        // 추후 BookResultCell에서 받아오는걸로 수정
         $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        $0.register(SearchResultCell.self, forCellWithReuseIdentifier: SearchResultCell.id)
         $0.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.id)
         $0.delegate = self
         $0.dataSource = self
@@ -34,7 +47,9 @@ final class SearchView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        searchBar.delegate = self
         setup()
+        reloadSearchResults()
     }
     
     required init?(coder: NSCoder) {
@@ -68,7 +83,7 @@ final class SearchView: UIView {
                 
                 let section = NSCollectionLayoutSection(group: group)
                 section.orthogonalScrollingBehavior = .continuous
-                section.interGroupSpacing = 10 // 그룹 간 간격
+                section.interGroupSpacing = 10
                 section.contentInsets = .init(top: 10, leading: 25, bottom: 30, trailing: 25)
                 
                 // 섹션 헤더 추가
@@ -129,6 +144,11 @@ final class SearchView: UIView {
             make.bottom.leading.trailing.equalTo(self.safeAreaLayoutGuide)
         }
     }
+    
+    // 데이터 갱신 함수
+    func reloadSearchResults() {
+        collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
+    }
 }
 
 enum SearchSection: Int, CaseIterable {
@@ -151,24 +171,35 @@ extension SearchView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch SearchSection(rawValue: section) {
         case .recentBooks: return 5
-        case .searchResults: return 10
+        case .searchResults: return searchResults.count
         default : return 0
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-        
-        cell.backgroundColor = .systemGray5
-        
-        if indexPath.section == SearchSection.recentBooks.rawValue {
-                cell.layer.cornerRadius = 40
-            } else {
-                cell.layer.cornerRadius = 8
-            }
+        let section = SearchSection(rawValue: indexPath.section)
+        switch section {
+        case .recentBooks:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
+            cell.backgroundColor = .systemGray5
+            cell.layer.cornerRadius = 40
             cell.clipsToBounds = true
-        
-        return cell
+            return cell
+        case .searchResults:
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: SearchResultCell.id, for: indexPath
+            ) as? SearchResultCell else { return UICollectionViewCell() }
+            guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
+                print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
+                return UICollectionViewCell()
+            }
+            let book = searchResults[indexPath.row]
+            cell.configure(with: book)
+            return cell
+
+        default:
+            return UICollectionViewCell()
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -190,4 +221,10 @@ extension SearchView: UICollectionViewDataSource {
 
 extension SearchView: UICollectionViewDelegate {
     
+}
+
+extension SearchView: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        delegate?.searchView(self, didSearch: searchBar.text ?? "")
+    }
 }

@@ -6,7 +6,7 @@
 //
 
 struct BookResponse: Decodable {
-    let mata: Meta
+    let meta: Meta
     let documents: [Book]
 }
 
@@ -24,7 +24,7 @@ struct Meta: Decodable {
 
 struct Book: Decodable {
     let title: String
-    let author: [String]
+    let authors: [String]
     let price: Int
     let thumbnail: String?
     let contents: String?
