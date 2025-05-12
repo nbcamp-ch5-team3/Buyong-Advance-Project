@@ -56,9 +56,11 @@ class SearchResultCell: UICollectionViewCell {
         }
         
         authorLabel.snp.makeConstraints { make in
-            make.leading.equalTo(titleLabel)
+            make.leading.equalToSuperview().inset(12)
+            make.trailing.lessThanOrEqualTo(priceLabel.snp.leading).offset(-8)
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
             make.bottom.equalToSuperview().inset(12)
+            
         }
         priceLabel.snp.makeConstraints { make in
             make.centerY.equalToSuperview()
@@ -70,6 +72,6 @@ class SearchResultCell: UICollectionViewCell {
     func configure(with book: Book) {
         titleLabel.text = book.title.isEmpty ? "제목 없음" : book.title
         authorLabel.text = book.authors.first ?? "저자 미상"
-        priceLabel.text = book.price == 0 ? "가격 미정" : "\(book.price)원"
+        priceLabel.text = book.price == 0 ? "가격 미정" : "\(book.price.decimalFormatted)원"
     }
 }

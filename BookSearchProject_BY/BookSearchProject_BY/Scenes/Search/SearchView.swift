@@ -34,11 +34,12 @@ final class SearchView: UIView {
         let textField = $0.searchTextField
         textField.layer.cornerRadius = 10
         textField.clipsToBounds = true
-        textField.font = UIFont.systemFont(ofSize: 18)
+        textField.font = UIFont.systemFont(ofSize: 17)
     }
     
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
         $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        $0.register(EmptyStateCell.self, forCellWithReuseIdentifier: EmptyStateCell.id)
         $0.register(SearchResultCell.self, forCellWithReuseIdentifier: SearchResultCell.id)
         $0.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.id)
         $0.delegate = self
@@ -170,14 +171,18 @@ extension SearchView: UICollectionViewDataSource {
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch SearchSection(rawValue: section) {
-        case .recentBooks: return 5
-        case .searchResults: return searchResults.count
-        default : return 0
+        case .searchResults:
+            return max(searchResults.count, 1) // 빈 상태일 때 1개
+        case .recentBooks:
+            return 5
+        default:
+            return 0
         }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let section = SearchSection(rawValue: indexPath.section)
+        
         switch section {
         case .recentBooks:
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
@@ -186,17 +191,20 @@ extension SearchView: UICollectionViewDataSource {
             cell.clipsToBounds = true
             return cell
         case .searchResults:
-            guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: SearchResultCell.id, for: indexPath
-            ) as? SearchResultCell else { return UICollectionViewCell() }
-            guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
-                print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
-                return UICollectionViewCell()
+            if searchResults.isEmpty {
+                return collectionView.dequeueReusableCell(withReuseIdentifier: EmptyStateCell.id, for: indexPath)
+            } else {
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: SearchResultCell.id, for: indexPath
+                ) as? SearchResultCell else { return UICollectionViewCell() }
+                guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
+                    print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
+                    return UICollectionViewCell()
+                }
+                let book = searchResults[indexPath.row]
+                cell.configure(with: book)
+                return cell
             }
-            let book = searchResults[indexPath.row]
-            cell.configure(with: book)
-            return cell
-
         default:
             return UICollectionViewCell()
         }
