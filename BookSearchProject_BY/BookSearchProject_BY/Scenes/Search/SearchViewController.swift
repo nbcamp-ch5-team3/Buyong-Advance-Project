@@ -65,4 +65,10 @@ extension SearchViewController: SearchViewDelegate {
     func searchView(_ searchView: SearchView, didSearch text: String) {
         searchVM.fetchBooks(query: text)
     }
+    
+    // detailVC.configure(with: book)
+    func searchView(_ searchView: SearchView, didSelectBook book: Book) {
+        let detailVC = BookDetailModalViewController()
+        present(detailVC, animated: true)
+    }
 }

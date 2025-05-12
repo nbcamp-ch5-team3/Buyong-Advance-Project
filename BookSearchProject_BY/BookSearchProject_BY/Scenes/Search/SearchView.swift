@@ -12,6 +12,7 @@ import Then
 
 protocol SearchViewDelegate: AnyObject {
     func searchView(_ searchView: SearchView, didSearch text: String)
+    func searchView(_ searchView: SearchView, didSelectBook book: Book)
 }
 
 final class SearchView: UIView {
@@ -228,7 +229,20 @@ extension SearchView: UICollectionViewDataSource {
 }
 
 extension SearchView: UICollectionViewDelegate {
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let section = SearchSection(rawValue: indexPath.section) else { return }
+        
+        switch section {
+        case .searchResults:
+            guard !searchResults.isEmpty else { return }
+            guard indexPath.row < searchResults.count else { return }
+            let selectedBook = searchResults[indexPath.row]
+            delegate?.searchView(self, didSelectBook: selectedBook)
+        case .recentBooks:
+            // 최근 본 책 선택 처리
+            break
+        }
+    }
 }
 
 extension SearchView: UISearchBarDelegate {
