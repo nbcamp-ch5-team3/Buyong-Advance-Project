@@ -11,7 +11,7 @@ protocol BookDetailModalDelegate: AnyObject {
     func didSaveBook(title: String)
 }
 
-class BookDetailModalViewController: UIViewController {
+final class BookDetailModalViewController: UIViewController {
     weak var delegate: BookDetailModalDelegate?
 
     private let detailView = BookDetailModalView()

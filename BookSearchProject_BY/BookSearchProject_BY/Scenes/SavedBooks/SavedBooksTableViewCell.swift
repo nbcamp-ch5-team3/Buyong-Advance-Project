@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-class SavedBooksTableViewCell: UITableViewCell {
+final class SavedBooksTableViewCell: UITableViewCell {
     static let id = "SavedBooksTableViewCell"
     
     private let containerView = UIView().then {
@@ -48,6 +48,10 @@ class SavedBooksTableViewCell: UITableViewCell {
     }
     
     private func setup() {
+        backgroundColor = .systemBackground
+
+        selectionStyle = .none
+
         contentView.addSubview(containerView)
         [titleLabel, authorLabel, priceLabel].forEach { containerView.addSubview($0) }
         setupConstraints()

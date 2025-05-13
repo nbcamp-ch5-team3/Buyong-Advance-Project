@@ -10,7 +10,7 @@ import SnapKit
 import Then
 import Kingfisher
 
-class BookDetailModalView: UIView {
+final class BookDetailModalView: UIView {
     
     private let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = true

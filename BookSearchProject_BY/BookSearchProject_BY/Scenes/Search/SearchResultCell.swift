@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-class SearchResultCell: UICollectionViewCell {
+final class SearchResultCell: UICollectionViewCell {
     static let id = "SearchResultCell"
     
     private let titleLabel = UILabel().then {

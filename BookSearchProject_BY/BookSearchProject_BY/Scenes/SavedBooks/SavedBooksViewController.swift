@@ -6,10 +6,9 @@
 //
 
 import UIKit
-
 import SnapKit
 
-class SavedBooksViewController: UIViewController {
+final class SavedBooksViewController: UIViewController {
     
     private let savedBooksView = SavedBooksView()
     private var savedBooks: [Book] = []
