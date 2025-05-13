@@ -9,7 +9,14 @@ import UIKit
 import SnapKit
 import Then
 
+protocol SavedBooksViewDelegate: AnyObject {
+    func didTapDeleteAllButton()
+    func didTapAddBookButton()
+}
+
 final class SavedBooksView: UIView {
+    
+    weak var delegate: SavedBooksViewDelegate?
     
     let tableView = UITableView().then {
         $0.backgroundColor = .clear
@@ -48,6 +55,7 @@ final class SavedBooksView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
+        setupButtonAction()
     }
     
     required init?(coder: NSCoder) {
@@ -72,5 +80,18 @@ final class SavedBooksView: UIView {
             make.top.equalTo(headerStackView.snp.bottom).offset(15)
             make.bottom.leading.trailing.equalTo(self.safeAreaLayoutGuide)
         }
+    }
+    
+    private func setupButtonAction() {
+        deleteAllButton.addTarget(self, action: #selector(deleteAllButtonTapped), for: .touchUpInside)
+        addBookButton.addTarget(self, action: #selector(addBookButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc private func deleteAllButtonTapped() {
+        delegate?.didTapDeleteAllButton()
+    }
+
+    @objc private func addBookButtonTapped() {
+        delegate?.didTapAddBookButton()
     }
 }

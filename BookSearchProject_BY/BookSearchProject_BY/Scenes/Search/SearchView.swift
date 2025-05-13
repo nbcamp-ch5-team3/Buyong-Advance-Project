@@ -26,7 +26,7 @@ final class SearchView: UIView {
         }
     }
     
-    private var searchBar = UISearchBar().then {
+    var searchBar = UISearchBar().then {
         $0.placeholder = "검색어를 입력하세요"
         $0.searchTextField.backgroundColor = .secondarySystemBackground
         $0.searchBarStyle = .minimal

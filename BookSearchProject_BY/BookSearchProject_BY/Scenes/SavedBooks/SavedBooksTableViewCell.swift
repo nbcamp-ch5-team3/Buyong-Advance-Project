@@ -59,6 +59,8 @@ final class SavedBooksTableViewCell: UITableViewCell {
     }
     
     private func setupConstraints() {
+        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        priceLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         
         containerView.snp.makeConstraints { make in
             make.top.bottom.equalToSuperview().inset(5)

@@ -17,6 +17,11 @@ final class SearchViewController: UIViewController {
     private let searchVM = SearchViewModel()
     private let disposeBag = DisposeBag()
     
+    // 서치바 외부 접근자 추가
+    var searchBar: UISearchBar {
+        return searchView.searchBar
+    }
+    
     // 책 목록이 바뀌면 콜렉션뷰 새로고침(VC → View로 데이터 전달)
     private var searchResults: [Book] = [] {
         didSet {

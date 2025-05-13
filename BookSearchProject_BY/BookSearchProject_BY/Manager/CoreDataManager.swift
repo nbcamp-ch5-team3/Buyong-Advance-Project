@@ -52,5 +52,17 @@ final class CoreDataManager {
             print("삭제 실패: \(error)")
         }
     }
+    
+    // CURD: ALL Delete
+    func deleteAllBooks() {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = SavedBook.fetchRequest()
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        do {
+            try context.execute(deleteRequest)
+            print("전체 삭제 성공")
+        } catch {
+            print("전체 삭제 실패: \(error)")
+        }
+    }
 
 }

@@ -8,8 +8,8 @@
 import UIKit
 import SnapKit
 
-final class SavedBooksViewController: UIViewController {
-    
+final class SavedBooksViewController: UIViewController, SavedBooksViewDelegate {
+        
     private let savedBooksView = SavedBooksView()
     private var savedBooks: [Book] = []
     private var savedCoreDataBooks: [SavedBook] = []
@@ -23,6 +23,7 @@ final class SavedBooksViewController: UIViewController {
         super.viewDidLoad()
         setup()
         setupTableView()
+        savedBooksView.delegate = self
     }
     
     private func setup() {
@@ -51,6 +52,39 @@ final class SavedBooksViewController: UIViewController {
         savedBooksView.tableView.reloadData()
     }
     
+    func didTapDeleteAllButton() {
+        let alert = UIAlertController(title: "전체 삭제",
+                                      message: "저장된 모든 책을 삭제하시겠습니까?",
+                                      preferredStyle: .alert
+        )
+        let deleteAction = UIAlertAction(title: "삭제",
+                                         style: .destructive) { [weak self] _ in
+            guard let self = self else { return }
+            CoreDataManager.shared.deleteAllBooks()
+            self.savedBooks.removeAll()
+            self.savedCoreDataBooks.removeAll()
+            self.savedBooksView.tableView.reloadData()
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        
+        [deleteAction, cancelAction].forEach { alert.addAction($0) }
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func didTapAddBookButton() {
+        // 1. 첫 번째 탭(검색화면)으로 이동
+        tabBarController?.selectedIndex = 0
+        
+        // 2. 탭 전환 후에 SearchViewController의 searchBar 활성화
+        if let tabBarController = self.tabBarController,
+           let searchVC = tabBarController.viewControllers?.first as? SearchViewController {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                searchVC.searchBar.becomeFirstResponder()
+            }
+        }
+    }
 }
 
 extension SavedBooksViewController: UITableViewDelegate, UITableViewDataSource {
