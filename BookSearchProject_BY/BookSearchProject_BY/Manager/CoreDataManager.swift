@@ -26,4 +26,16 @@ class CoreDataManager {
             print("저장 실패 에러: \(error)")
         }
     }
+    
+    // CURD: Read
+    func fetchBooks() -> [SavedBook] {
+        let request: NSFetchRequest<SavedBook> = SavedBook.fetchRequest()
+        do {
+            let books = try context.fetch(request)
+            return books
+        } catch {
+            print("불러오기 실패 에러: \(error)")
+            return []
+        }
+    }
 }
