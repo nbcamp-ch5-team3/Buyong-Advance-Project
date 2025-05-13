@@ -35,6 +35,7 @@ class BookDetailModalView: UIView {
     let authorLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 16)
         $0.textColor = .secondaryLabel
+        $0.numberOfLines = 0
         $0.textAlignment = .center
     }
     
@@ -108,14 +109,13 @@ class BookDetailModalView: UIView {
         }
         
         thumbnailImageView.snp.makeConstraints { make in
-            make.width.equalTo(120)
             make.height.equalTo(300)
             make.centerX.equalToSuperview()
         }
         
        contentStackView.snp.makeConstraints { make in
             make.top.bottom.equalToSuperview()
-            make.width.equalTo(scrollView.snp.width).offset(-50)
+            make.leading.trailing.equalToSuperview().inset(40)
             make.centerX.equalToSuperview()
         }
         

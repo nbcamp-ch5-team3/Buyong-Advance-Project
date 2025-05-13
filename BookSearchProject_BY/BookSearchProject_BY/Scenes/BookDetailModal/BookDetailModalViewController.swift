@@ -7,7 +7,13 @@
 
 import UIKit
 
+protocol BookDetailModalDelegate: AnyObject {
+    func didSaveBook(title: String)
+}
+
 class BookDetailModalViewController: UIViewController {
+    weak var delegate: BookDetailModalDelegate?
+
     private let detailView = BookDetailModalView()
     
     private var book: Book?
@@ -51,10 +57,22 @@ class BookDetailModalViewController: UIViewController {
     
     private func setupActions() {
         detailView.closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
-        //detailView.saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
+        detailView.saveButton.addTarget(self, action: #selector(saveButtonTapped), for: .touchUpInside)
     }
     
     @objc private func closeButtonTapped() {
+        dismiss(animated: true)
+    }
+    
+    @objc private func saveButtonTapped() {
+        guard let book = book else { return }
+        
+        CoreDataManager.shared.saveBook(
+            title: book.title,
+            author: book.authors.first ?? "",
+            price: Int64(book.price)
+        )
+        delegate?.didSaveBook(title: book.title)
         dismiss(animated: true)
     }
 }
