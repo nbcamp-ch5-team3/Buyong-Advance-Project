@@ -7,8 +7,8 @@
 
 import UIKit
 
-final class EmptyStateCell: UICollectionViewCell {
-    static let id = "EmptyStateCell"
+final class SearchEmptyStateCell: UICollectionViewCell {
+    static let id = "SearchEmptyStateCell"
     
     private let messageLabel = UILabel().then {
         $0.text = "검색 결과가 없습니다"

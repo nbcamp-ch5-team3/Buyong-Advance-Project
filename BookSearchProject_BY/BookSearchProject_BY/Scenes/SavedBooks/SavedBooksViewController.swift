@@ -12,6 +12,7 @@ final class SavedBooksViewController: UIViewController {
     
     private let savedBooksView = SavedBooksView()
     private var savedBooks: [Book] = []
+    private var savedCoreDataBooks: [SavedBook] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,13 +35,15 @@ final class SavedBooksViewController: UIViewController {
     private func setupTableView() {
         let tableView = savedBooksView.tableView
         tableView.register(SavedBooksTableViewCell.self, forCellReuseIdentifier: SavedBooksTableViewCell.id)
+        tableView.register(SavedEmptyStateCell.self, forCellReuseIdentifier: SavedEmptyStateCell.id)
         tableView.delegate = self
         tableView.dataSource = self
     }
     
     private func fetchSavedBooks() {
-        let savedCoreDataBooks = CoreDataManager.shared.fetchBooks()
-        self.savedBooks = savedCoreDataBooks.map { Book(savedBook: $0) }
+        let fetched = CoreDataManager.shared.fetchBooks()
+        self.savedCoreDataBooks = fetched
+        self.savedBooks = fetched.map { Book(savedBook: $0) }
         savedBooksView.tableView.reloadData()
     }
     
@@ -48,14 +51,42 @@ final class SavedBooksViewController: UIViewController {
 
 extension SavedBooksViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return savedBooks.count
+        return savedBooks.isEmpty ? 1 : savedBooks.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: SavedBooksTableViewCell.id, for: indexPath) as? SavedBooksTableViewCell else {
-            return UITableViewCell()
+        if savedBooks.isEmpty {
+            let cell = tableView.dequeueReusableCell(withIdentifier: SavedEmptyStateCell.id, for: indexPath) as! SavedEmptyStateCell
+            cell.selectionStyle = .none
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: SavedBooksTableViewCell.id, for: indexPath) as! SavedBooksTableViewCell
+            cell.configure(with: savedBooks[indexPath.row])
+            return cell
         }
-        cell .configure(with: savedBooks[indexPath.row])
-        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        
+        // 목록이 아무것도 없다면 스와프 삭제 안보이게 처리
+        if savedBooks.isEmpty {
+                return nil
+        }
+        
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] (_, _, completionHandler) in
+            guard let self = self else { return }
+            
+            let coreDataBook = self.savedCoreDataBooks[indexPath.row]
+            CoreDataManager.shared.deleteBook(coreDataBook)
+            
+            //배열에서 삭제하기
+            self.savedCoreDataBooks.remove(at: indexPath.row)
+            self.savedBooks.remove(at: indexPath.row)
+              
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+            completionHandler(true)
+        }
+        deleteAction.backgroundColor = .white
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }

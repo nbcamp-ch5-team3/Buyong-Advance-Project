@@ -40,7 +40,7 @@ final class SearchView: UIView {
     
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
         $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
-        $0.register(EmptyStateCell.self, forCellWithReuseIdentifier: EmptyStateCell.id)
+        $0.register(SearchEmptyStateCell.self, forCellWithReuseIdentifier: SearchEmptyStateCell.id)
         $0.register(SearchResultCell.self, forCellWithReuseIdentifier: SearchResultCell.id)
         $0.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.id)
         $0.delegate = self
@@ -193,7 +193,7 @@ extension SearchView: UICollectionViewDataSource {
             return cell
         case .searchResults:
             if searchResults.isEmpty {
-                return collectionView.dequeueReusableCell(withReuseIdentifier: EmptyStateCell.id, for: indexPath)
+                return collectionView.dequeueReusableCell(withReuseIdentifier: SearchEmptyStateCell.id, for: indexPath)
             } else {
                 guard let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: SearchResultCell.id, for: indexPath

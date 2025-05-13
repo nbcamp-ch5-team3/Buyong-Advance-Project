@@ -38,4 +38,16 @@ final class CoreDataManager {
             return []
         }
     }
+    
+    // CURD: Delete
+    func deleteBook(_ book: SavedBook) {
+        context.delete(book)
+        do {
+            try context.save()
+            print("삭제 성공")
+        } catch {
+            print("삭제 실패: \(error)")
+        }
+    }
+
 }
