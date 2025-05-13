@@ -14,11 +14,15 @@ final class SavedBooksViewController: UIViewController {
     private var savedBooks: [Book] = []
     private var savedCoreDataBooks: [SavedBook] = []
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchSavedBooks()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
         setupTableView()
-        fetchSavedBooks()
     }
     
     private func setup() {
@@ -82,8 +86,14 @@ extension SavedBooksViewController: UITableViewDelegate, UITableViewDataSource {
             //배열에서 삭제하기
             self.savedCoreDataBooks.remove(at: indexPath.row)
             self.savedBooks.remove(at: indexPath.row)
-              
-            tableView.deleteRows(at: [indexPath], with: .automatic)
+            
+            // 마지막 셀 삭제 -> 전체 reload, 여러개가 남아있을 때만 deleteRows 사용
+            if self.savedBooks.isEmpty {
+                tableView.reloadData()
+            } else {
+                tableView.deleteRows(at: [indexPath], with: .automatic)
+            }
+            
             completionHandler(true)
         }
         deleteAction.backgroundColor = .white
