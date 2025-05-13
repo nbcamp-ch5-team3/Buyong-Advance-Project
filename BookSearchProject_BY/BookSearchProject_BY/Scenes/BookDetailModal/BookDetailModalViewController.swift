@@ -10,10 +10,18 @@ import UIKit
 class BookDetailModalViewController: UIViewController {
     private let detailView = BookDetailModalView()
     
+    private var book: Book?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureModalPresentation()
         setupView()
+        setupActions()
+        
+        // viewDidLoad 시점에 book이 있으면 detailView에 데이터 세팅
+        if let book = book {
+            detailView.configure(with: book)
+        }
     }
     
     private func configureModalPresentation() {
@@ -33,6 +41,12 @@ class BookDetailModalViewController: UIViewController {
     
     private func setupView() {
         view = detailView
+    }
+    
+    // 외부에서 데이터를 세팅할 수 있도록 설정
+    func configure(with book: Book) {
+        self.book = book
+        detailView.configure(with: book)
     }
     
     private func setupActions() {

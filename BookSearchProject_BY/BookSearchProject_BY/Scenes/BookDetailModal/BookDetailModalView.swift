@@ -77,7 +77,6 @@ class BookDetailModalView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
-        setupDummyData()
     }
     
     required init?(coder: NSCoder) {
@@ -148,23 +147,14 @@ class BookDetailModalView: UIView {
         }
     }
     
-    private func setupDummyData() {
-        titleLabel.text = "해리포터와 아즈카반의 죄수 (Harry Potter and the Prisoner of Azkaban)"
-        
-        authorLabel.text = "J.K. 롤링 지음 | 문학수첩"
-        
-        if let url = URL(string: "https://image.yes24.com/goods/82946464/XL") {
+    // Book 모델을 받아서 데이터를 세팅
+    func configure(with book: Book) {
+        titleLabel.text = book.title
+        authorLabel.text = book.authors.joined(separator: " , ") + "지음"
+        if let url = book.thumbnail, let url = URL(string: url) {
             thumbnailImageView.kf.setImage(with: url)
         }
-        
-        priceLabel.text = "가격: 15,800원"
-        
-        contentsLabel.text = """
-        호그와트 마법학교 3학년이 된 해리 포터. 이번에는 아즈카반이라는 마법사 감옥을 탈출한 죄수 시리우스 블랙이라는 살인마가 해리를 노린다는 소문이 돌지만, 해리는 호그와트에서 평소와 다름없이 생활한다.
-        
-        새 학기가 시작되고 디멘터라는 무시무시한 생명체가 호그와트를 지키게 되고, 해리는 이 디멘터와 마주칠 때마다 기절하고 만다. 루핀 교수의 도움으로 패트로누스 마법을 배우면서 디멘터에 대항하는 법을 익히게 되는데...
-        
-        해리는 시리우스 블랙의 진짜 정체와 부모님의 죽음에 얽힌 진실을 알게 되면서 예상치 못한 모험을 하게 됩니다.
-        """
+        priceLabel.text = "가격: \(book.price.decimalFormatted)원"
+        contentsLabel.text = book.contents
     }
 }

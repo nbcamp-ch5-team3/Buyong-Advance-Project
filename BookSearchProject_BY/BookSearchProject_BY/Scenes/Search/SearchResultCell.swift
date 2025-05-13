@@ -51,18 +51,19 @@ class SearchResultCell: UICollectionViewCell {
     
     private func setupConstraints() {
         titleLabel.snp.makeConstraints { make in
+            make.trailing.lessThanOrEqualTo(priceLabel.snp.leading).offset(-10)
             make.top.leading.equalToSuperview().inset(12)
-            make.trailing.lessThanOrEqualTo(priceLabel.snp.leading).offset(-8)
         }
         
         authorLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview().inset(12)
             make.trailing.lessThanOrEqualTo(priceLabel.snp.leading).offset(-8)
+            make.leading.equalToSuperview().inset(12)
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
             make.bottom.equalToSuperview().inset(12)
             
         }
         priceLabel.snp.makeConstraints { make in
+            make.leading.greaterThanOrEqualTo(titleLabel.snp.trailing).offset(8)
             make.centerY.equalToSuperview()
             make.trailing.equalToSuperview().inset(12)
             make.width.greaterThanOrEqualTo(60)

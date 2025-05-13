@@ -69,6 +69,7 @@ extension SearchViewController: SearchViewDelegate {
     // detailVC.configure(with: book)
     func searchView(_ searchView: SearchView, didSelectBook book: Book) {
         let detailVC = BookDetailModalViewController()
+        detailVC.configure(with: book)
         present(detailVC, animated: true)
     }
 }
