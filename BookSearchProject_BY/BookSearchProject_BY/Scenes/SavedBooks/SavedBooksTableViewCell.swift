@@ -22,8 +22,9 @@ final class SavedBooksTableViewCell: UITableViewCell {
     
     private let titleLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 15, weight: .medium)
-        $0.numberOfLines = 0
+        $0.numberOfLines = 2
         $0.textColor = .label
+        $0.lineBreakMode = .byTruncatingTail
     }
     
     private let authorLabel = UILabel().then {
