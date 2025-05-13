@@ -29,3 +29,14 @@ struct Book: Decodable {
     let thumbnail: String?
     let contents: String?
 }
+
+// CoreData → Book 변환을 위한 이니셜라이저 추가
+extension Book {
+    init(savedBook: SavedBook) {
+        self.title = savedBook.title ?? ""
+        self.authors = [savedBook.author ?? ""]
+        self.price = Int(savedBook.price)
+        self.thumbnail = nil
+        self.contents = nil
+    }
+}

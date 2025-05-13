@@ -1,21 +1,30 @@
 //
-//  SearchResultCell.swift
+//  SavedBooksTableViewCell.swift
 //  BookSearchProject_BY
 //
-//  Created by iOS study on 5/9/25.
+//  Created by iOS study on 5/13/25.
 //
 
 import UIKit
 import SnapKit
 import Then
 
-final class SearchResultCell: UICollectionViewCell {
-    static let id = "SearchResultCell"
+final class SavedBooksTableViewCell: UITableViewCell {
+    static let id = "SavedBooksTableViewCell"
+    
+    private let containerView = UIView().then {
+        $0.backgroundColor = .systemBackground
+        $0.layer.cornerRadius = 8
+        $0.layer.borderWidth = 1
+        $0.layer.borderColor = UIColor.systemGray6.cgColor
+        $0.clipsToBounds = true
+    }
     
     private let titleLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 15, weight: .medium)
-        $0.numberOfLines = 0
+        $0.numberOfLines = 2
         $0.textColor = .label
+        $0.lineBreakMode = .byTruncatingTail
     }
     
     private let authorLabel = UILabel().then {
@@ -29,8 +38,9 @@ final class SearchResultCell: UICollectionViewCell {
         $0.textAlignment = .right
     }
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        backgroundColor = .systemBackground
         setup()
     }
     
@@ -39,17 +49,24 @@ final class SearchResultCell: UICollectionViewCell {
     }
     
     private func setup() {
-        contentView.backgroundColor = .systemBackground
-        contentView.layer.cornerRadius = 8
-        contentView.layer.borderWidth = 1
-        contentView.layer.borderColor = UIColor.systemGray6.cgColor
-        contentView.clipsToBounds = true
-        
-        [titleLabel, authorLabel, priceLabel].forEach { contentView.addSubview($0)}
+        backgroundColor = .systemBackground
+
+        selectionStyle = .none
+
+        contentView.addSubview(containerView)
+        [titleLabel, authorLabel, priceLabel].forEach { containerView.addSubview($0) }
         setupConstraints()
     }
     
     private func setupConstraints() {
+        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        priceLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        
+        containerView.snp.makeConstraints { make in
+            make.top.bottom.equalToSuperview().inset(5)
+            make.leading.trailing.equalToSuperview().inset(25)
+        }
+        
         titleLabel.snp.makeConstraints { make in
             make.trailing.lessThanOrEqualTo(priceLabel.snp.leading).offset(-10)
             make.top.leading.equalToSuperview().inset(12)
@@ -60,7 +77,6 @@ final class SearchResultCell: UICollectionViewCell {
             make.leading.equalToSuperview().inset(12)
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
             make.bottom.equalToSuperview().inset(12)
-            
         }
         priceLabel.snp.makeConstraints { make in
             make.leading.greaterThanOrEqualTo(titleLabel.snp.trailing).offset(8)
@@ -69,7 +85,7 @@ final class SearchResultCell: UICollectionViewCell {
             make.width.greaterThanOrEqualTo(60)
         }
     }
-
+    
     func configure(with book: Book) {
         titleLabel.text = book.title.isEmpty ? "제목 없음" : book.title
         authorLabel.text = book.authors.first ?? "저자 미상"

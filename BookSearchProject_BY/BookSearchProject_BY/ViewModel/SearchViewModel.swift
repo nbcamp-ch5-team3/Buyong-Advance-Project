@@ -9,7 +9,7 @@ import Alamofire
 import RxSwift
 import RxCocoa
 
-class SearchViewModel {
+final class SearchViewModel {
     private let disposeBag = DisposeBag()
     private let apiKey = "fd377cd5d584a8c6f60b855dae5e5509"
     
