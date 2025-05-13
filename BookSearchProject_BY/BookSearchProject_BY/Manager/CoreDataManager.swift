@@ -18,6 +18,7 @@ final class CoreDataManager {
         newBook.title = title
         newBook.author = author
         newBook.price = price
+        newBook.createdAt = Date()
         
         do {
             try context.save()
@@ -30,6 +31,8 @@ final class CoreDataManager {
     // CURD: Read
     func fetchBooks() -> [SavedBook] {
         let request: NSFetchRequest<SavedBook> = SavedBook.fetchRequest()
+        let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: false)
+        request.sortDescriptors = [sortDescriptor]
         do {
             let books = try context.fetch(request)
             return books
