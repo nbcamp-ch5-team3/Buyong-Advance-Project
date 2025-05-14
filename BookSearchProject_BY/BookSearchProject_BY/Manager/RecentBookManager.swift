@@ -48,7 +48,6 @@ final class RecentBookManager {
     func fetchBook(thumbnail: String) -> RecentBook? {
         let request: NSFetchRequest<RecentBook> = RecentBook.fetchRequest()
         request.predicate = NSPredicate(format: "thumbnailImage == %@", thumbnail)
-        print("데이터 읽기 성공: \(context)")
         return (try? context.fetch(request))?.first
     }
     
@@ -56,7 +55,6 @@ final class RecentBookManager {
     func fetchAllBooks() -> [RecentBook] {
         let request: NSFetchRequest<RecentBook> = RecentBook.fetchRequest()
         request.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
-        print("데이터 읽기 성공: \(request)")
         return (try? context.fetch(request)) ?? []
     }
     
