@@ -10,11 +10,6 @@ import UIKit
 import SnapKit
 import Then
 
-protocol SearchViewDelegate: AnyObject {
-    func searchView(_ searchView: SearchView, didSearch text: String)
-    func searchView(_ searchView: SearchView, didSelectBook book: Book)
-}
-
 final class SearchView: UIView {
     
     weak var delegate: SearchViewDelegate?
@@ -23,6 +18,12 @@ final class SearchView: UIView {
     var searchResults: [Book] = [] {
         didSet {
             collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
+        }
+    }
+    
+    var recentBooks: [RecentBook] = [] {
+        didSet {
+            collectionView.reloadSections(IndexSet(integer: SearchSection.recentBooks.rawValue))
         }
     }
     
@@ -39,7 +40,7 @@ final class SearchView: UIView {
     }
     
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
-        $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        $0.register(RecentBookCell.self, forCellWithReuseIdentifier: RecentBookCell.id)
         $0.register(SearchEmptyStateCell.self, forCellWithReuseIdentifier: SearchEmptyStateCell.id)
         $0.register(SearchResultCell.self, forCellWithReuseIdentifier: SearchResultCell.id)
         $0.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.id)
@@ -78,7 +79,7 @@ final class SearchView: UIView {
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 let groupSize = NSCollectionLayoutSize(
-                    widthDimension: .estimated(80),
+                    widthDimension: .absolute(80),
                     heightDimension: .estimated(100)
                 )
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
@@ -151,102 +152,14 @@ final class SearchView: UIView {
     func reloadSearchResults() {
         collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
     }
-}
-
-enum SearchSection: Int, CaseIterable {
-    case recentBooks
-    case searchResults
     
-    var title: String {
-        switch self {
-        case .recentBooks: return "최근 본 책"
-        case .searchResults: return "검색 결과"
-        }
-    }
-}
-
-
-extension SearchView: UICollectionViewDataSource {
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return SearchSection.allCases.count
-    }
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch SearchSection(rawValue: section) {
-        case .searchResults:
-            return max(searchResults.count, 1) // 빈 상태일 때 1개
-        case .recentBooks:
-            return 5
-        default:
-            return 0
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let section = SearchSection(rawValue: indexPath.section)
-        
-        switch section {
-        case .recentBooks:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-            cell.backgroundColor = .systemGray5
-            cell.layer.cornerRadius = 40
-            cell.clipsToBounds = true
-            return cell
-        case .searchResults:
-            if searchResults.isEmpty {
-                return collectionView.dequeueReusableCell(withReuseIdentifier: SearchEmptyStateCell.id, for: indexPath)
-            } else {
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: SearchResultCell.id, for: indexPath
-                ) as? SearchResultCell else { return UICollectionViewCell() }
-                guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
-                    print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
-                    return UICollectionViewCell()
-                }
-                let book = searchResults[indexPath.row]
-                cell.configure(with: book)
-                return cell
+    func reloadRecentBooks(oldBooks: [RecentBook], newBooks: [RecentBook]) {
+        guard oldBooks.count == newBooks.count else { return }
+        for i in 0..<newBooks.count {
+            if oldBooks[i] != newBooks[i] {
+                let indexPath = IndexPath(row: i, section: SearchSection.recentBooks.rawValue)
+                collectionView.reloadItems(at: [indexPath])
             }
-        default:
-            return UICollectionViewCell()
         }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        guard kind == UICollectionView.elementKindSectionHeader else {
-            return UICollectionReusableView()
-        }
-        
-        guard let headerView = collectionView.dequeueReusableSupplementaryView(
-            ofKind: kind,
-            withReuseIdentifier: SectionHeaderView.id,
-            for: indexPath
-        ) as? SectionHeaderView else { return UICollectionReusableView() }
-        
-        let sectionType = SearchSection.allCases[indexPath.section]
-        headerView.configure(title: sectionType.title)
-        return headerView
-    }
-}
-
-extension SearchView: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let section = SearchSection(rawValue: indexPath.section) else { return }
-        
-        switch section {
-        case .searchResults:
-            guard !searchResults.isEmpty else { return }
-            guard indexPath.row < searchResults.count else { return }
-            let selectedBook = searchResults[indexPath.row]
-            delegate?.searchView(self, didSelectBook: selectedBook)
-        case .recentBooks:
-            // 최근 본 책 선택 처리
-            break
-        }
-    }
-}
-
-extension SearchView: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        delegate?.searchView(self, didSearch: searchBar.text ?? "")
     }
 }

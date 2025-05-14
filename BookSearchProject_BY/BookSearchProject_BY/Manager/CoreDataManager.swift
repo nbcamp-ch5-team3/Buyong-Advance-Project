@@ -12,8 +12,12 @@ final class CoreDataManager {
     static let shared = CoreDataManager()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    // CRUD : Create
-    func saveBook(title: String, author: String, price: Int64) {
+    // CRUD : C
+    func saveBook(title: String, author: String, price: Int64) -> Bool {
+        if isBookAlreadySaved(title: title, author: author) {
+            return false
+        }
+        
         let newBook = SavedBook(context: context)
         newBook.title = title
         newBook.author = author
@@ -23,12 +27,14 @@ final class CoreDataManager {
         do {
             try context.save()
             print("저장 성공: \(context)")
+            return true
         } catch {
             print("저장 실패 에러: \(error)")
+            return false
         }
     }
     
-    // CURD: Read
+    // CRUD: R
     func fetchBooks() -> [SavedBook] {
         let request: NSFetchRequest<SavedBook> = SavedBook.fetchRequest()
         let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: false)
@@ -42,7 +48,7 @@ final class CoreDataManager {
         }
     }
     
-    // CURD: Delete
+    // CRUD: D
     func deleteBook(_ book: SavedBook) {
         context.delete(book)
         do {
@@ -53,7 +59,7 @@ final class CoreDataManager {
         }
     }
     
-    // CURD: ALL Delete
+    // CRUD: D (All)
     func deleteAllBooks() {
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = SavedBook.fetchRequest()
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
@@ -64,5 +70,17 @@ final class CoreDataManager {
             print("전체 삭제 실패: \(error)")
         }
     }
-
+    
+    // 중복체크(title + author로 확인)를 위한 메서드
+    func isBookAlreadySaved(title: String, author: String) -> Bool {
+        let fetchRequest: NSFetchRequest<SavedBook> = SavedBook.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "title == %@ AND author == %@", title, author)
+        do {
+            let count = try context.count(for: fetchRequest)
+            return count > 0
+        } catch {
+            print("중복 체크 실패: \(error)")
+            return false
+        }
+    }
 }

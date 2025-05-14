@@ -8,7 +8,8 @@
 import UIKit
 
 protocol BookDetailModalDelegate: AnyObject {
-    func didSaveBook(title: String)
+    func didSaveBook(title: String, author: String, price: Int64, isSaved: Bool)
+    func modalDidDismiss()
 }
 
 final class BookDetailModalViewController: UIViewController {
@@ -17,6 +18,11 @@ final class BookDetailModalViewController: UIViewController {
     private let detailView = BookDetailModalView()
     
     private var book: Book?
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        delegate?.modalDidDismiss()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -67,12 +73,20 @@ final class BookDetailModalViewController: UIViewController {
     @objc private func saveButtonTapped() {
         guard let book = book else { return }
         
-        CoreDataManager.shared.saveBook(
+        // 저장 결과 받아오기
+        let isSaved = CoreDataManager.shared.saveBook(
             title: book.title,
             author: book.authors.first ?? "",
             price: Int64(book.price)
         )
-        delegate?.didSaveBook(title: book.title)
+        
+        // 저장 결과를 delegate로 전달
+        delegate?.didSaveBook(
+            title: book.title,
+            author: book.authors.first ?? "",
+            price: Int64(book.price),
+            isSaved: isSaved
+        )
         dismiss(animated: true)
     }
 }
