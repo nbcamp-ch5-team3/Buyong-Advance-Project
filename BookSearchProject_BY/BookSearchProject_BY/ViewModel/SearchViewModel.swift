@@ -7,7 +7,6 @@
 
 import Alamofire
 import RxSwift
-import RxCocoa
 
 final class SearchViewModel {
     private let disposeBag = DisposeBag()
