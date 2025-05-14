@@ -188,26 +188,23 @@ extension SearchView: UICollectionViewDataSource {
             return cell
             
         case .searchResults:
-            if searchResults.isEmpty {
+            guard !searchResults.isEmpty else {
                 return collectionView.dequeueReusableCell(withReuseIdentifier: SearchEmptyStateCell.id, for: indexPath)
-            } else {
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: SearchResultCell.id, for: indexPath
-                ) as? SearchResultCell else { return UICollectionViewCell()
-                }
-                
-                guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
-                    print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
-                    return UICollectionViewCell()
-                }
-                
-                let book = searchResults[indexPath.row]
-                cell.configure(with: book)
-                return cell
             }
             
-        default:
-            return UICollectionViewCell()
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: SearchResultCell.id, for: indexPath
+            ) as? SearchResultCell else { return UICollectionViewCell()
+            }
+            
+            guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
+                print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
+                return UICollectionViewCell()
+            }
+            
+            let book = searchResults[indexPath.row]
+            cell.configure(with: book)
+            return cell
         }
     }
     
