@@ -30,6 +30,19 @@ final class SearchViewController: UIViewController {
         }
     }
     
+    private var recentBooks: [RecentBook] = [] {
+        didSet {
+            print("VC recentBooks didSet! 개수: \(recentBooks.count)")
+            searchView.recentBooks = recentBooks
+            searchView.reloadRecentBooks()
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        searchVM.fetchRecentBooks()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
@@ -62,6 +75,13 @@ final class SearchViewController: UIViewController {
             .subscribe(onNext: { error in
                 print("에러 발생: \(error)")
             }).disposed(by: disposeBag)
+        
+        // 4. RecentBooks 데이터 바인딩
+        searchVM.recentBooks
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { [weak self] books in
+                self?.recentBooks = books
+            }).disposed(by: disposeBag)
     }
 }
 
@@ -73,6 +93,12 @@ extension SearchViewController: SearchViewDelegate {
     
     // detailVC.configure(with: book)
     func searchView(_ searchView: SearchView, didSelectBook book: Book) {
+        // 1. 최근 본 책 저장
+        RecentBookManager.shared.saveRecentBook(
+            thumbnail: book.thumbnail ?? ""
+        )
+        
+        // 2. 모달 띄우기
         let detailVC = BookDetailModalViewController()
         detailVC.configure(with: book)
         detailVC.delegate = self
@@ -93,5 +119,10 @@ extension SearchViewController: BookDetailModalDelegate {
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             self?.present(alert, animated: true)
         }
+    }
+    
+    // 모달이 내려갔을 때 항상 최근 본 책 갱신
+    func modalDidDismiss() {
+        searchVM.fetchRecentBooks()
     }
 }

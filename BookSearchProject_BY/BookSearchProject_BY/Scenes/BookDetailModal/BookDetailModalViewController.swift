@@ -9,6 +9,7 @@ import UIKit
 
 protocol BookDetailModalDelegate: AnyObject {
     func didSaveBook(title: String)
+    func modalDidDismiss()
 }
 
 final class BookDetailModalViewController: UIViewController {
@@ -17,6 +18,11 @@ final class BookDetailModalViewController: UIViewController {
     private let detailView = BookDetailModalView()
     
     private var book: Book?
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        delegate?.modalDidDismiss()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()

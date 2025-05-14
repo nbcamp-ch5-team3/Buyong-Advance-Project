@@ -83,8 +83,6 @@ final class SavedBooksView: UIView {
     }
     
     private func setupButtonAction() {
-        let searchButtonClicked = searchBar.rx.searchButtonClicked
-            .withLatestFrom(searchBar.rx.text.orEmpty)
         deleteAllButton.addTarget(self, action: #selector(deleteAllButtonTapped), for: .touchUpInside)
         addBookButton.addTarget(self, action: #selector(addBookButtonTapped), for: .touchUpInside)
     }

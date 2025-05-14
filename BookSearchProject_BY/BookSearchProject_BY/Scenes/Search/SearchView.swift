@@ -26,6 +26,12 @@ final class SearchView: UIView {
         }
     }
     
+    var recentBooks: [RecentBook] = [] {
+        didSet {
+            collectionView.reloadSections(IndexSet(integer: SearchSection.recentBooks.rawValue))
+        }
+    }
+    
     var searchBar = UISearchBar().then {
         $0.placeholder = "검색어를 입력하세요"
         $0.searchTextField.backgroundColor = .secondarySystemBackground
@@ -39,7 +45,7 @@ final class SearchView: UIView {
     }
     
     private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
-        $0.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
+        $0.register(RecentBookCell.self, forCellWithReuseIdentifier: RecentBookCell.id)
         $0.register(SearchEmptyStateCell.self, forCellWithReuseIdentifier: SearchEmptyStateCell.id)
         $0.register(SearchResultCell.self, forCellWithReuseIdentifier: SearchResultCell.id)
         $0.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.id)
@@ -78,7 +84,7 @@ final class SearchView: UIView {
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
                 let groupSize = NSCollectionLayoutSize(
-                    widthDimension: .estimated(80),
+                    widthDimension: .absolute(80),
                     heightDimension: .estimated(100)
                 )
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
@@ -151,6 +157,10 @@ final class SearchView: UIView {
     func reloadSearchResults() {
         collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
     }
+    
+    func reloadRecentBooks() {
+        collectionView.reloadSections(IndexSet(integer: SearchSection.recentBooks.rawValue))
+    }
 }
 
 extension SearchView: UICollectionViewDataSource {
@@ -162,7 +172,7 @@ extension SearchView: UICollectionViewDataSource {
         case .searchResults:
             return max(searchResults.count, 1) // 빈 상태일 때 1개
         case .recentBooks:
-            return 5
+            return recentBooks.count
         default:
             return 0
         }
@@ -173,26 +183,34 @@ extension SearchView: UICollectionViewDataSource {
         
         switch section {
         case .recentBooks:
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath)
-            cell.backgroundColor = .systemGray5
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecentBookCell.id, for: indexPath) as? RecentBookCell else { return UICollectionViewCell()
+            }
+            
+            let book = recentBooks[indexPath.row]
             cell.layer.cornerRadius = 40
             cell.clipsToBounds = true
+            cell.configure(with: book.thumbnailImage)
             return cell
+            
         case .searchResults:
             if searchResults.isEmpty {
                 return collectionView.dequeueReusableCell(withReuseIdentifier: SearchEmptyStateCell.id, for: indexPath)
             } else {
                 guard let cell = collectionView.dequeueReusableCell(
                     withReuseIdentifier: SearchResultCell.id, for: indexPath
-                ) as? SearchResultCell else { return UICollectionViewCell() }
+                ) as? SearchResultCell else { return UICollectionViewCell()
+                }
+                
                 guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
                     print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
                     return UICollectionViewCell()
                 }
+                
                 let book = searchResults[indexPath.row]
                 cell.configure(with: book)
                 return cell
             }
+            
         default:
             return UICollectionViewCell()
         }
@@ -200,19 +218,25 @@ extension SearchView: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader else {
-            return UICollectionReusableView()
+            fatalError("지원하지 않는 kind")
         }
-        
-        guard let headerView = collectionView.dequeueReusableSupplementaryView(
+        let sectionType = SearchSection.allCases[indexPath.section]
+        let headerView = collectionView.dequeueReusableSupplementaryView(
             ofKind: kind,
             withReuseIdentifier: SectionHeaderView.id,
             for: indexPath
-        ) as? SectionHeaderView else { return UICollectionReusableView() }
-        
-        let sectionType = SearchSection.allCases[indexPath.section]
-        headerView.configure(title: sectionType.title)
+        ) as! SectionHeaderView
+
+        // recentBooks가 없으면 헤더 숨김
+        if sectionType == .recentBooks && recentBooks.isEmpty {
+            headerView.isHidden = true
+        } else {
+            headerView.isHidden = false
+            headerView.configure(title: sectionType.title)
+        }
         return headerView
     }
+
 }
 
 extension SearchView: UICollectionViewDelegate {

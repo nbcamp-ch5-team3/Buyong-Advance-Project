@@ -15,8 +15,11 @@ final class SearchViewModel {
     let books = BehaviorSubject(value: [Book]())
     let error = PublishSubject<Error>()
     
+    // ===== 최근 본 책 읽기 =====
+    let recentBooks = BehaviorSubject(value: [RecentBook]())
+    
     func fetchBooks(query: String) {
-        // 검색어를 URL에 쓸 수 있도록 인코딩
+        // 검색어를 URL에 쓸 수 있도록 인코딩 (한글도 가능하도록 안전하게)
         guard let queryEncoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
             error.onNext(NetworkError.invalidUrl)
             return
@@ -35,4 +38,11 @@ final class SearchViewModel {
                 self?.error.onNext(error)
             }) .disposed(by: disposeBag)
     }
+    
+    // ===== 최근 본 책 읽기 =====
+    func fetchRecentBooks() {
+        let books = RecentBookManager.shared.fetchAllBooks()
+        recentBooks.onNext(books)
+    }
+
 }
