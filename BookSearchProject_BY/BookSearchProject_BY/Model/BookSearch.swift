@@ -40,3 +40,13 @@ extension Book {
         self.contents = nil
     }
 }
+
+extension Book {
+    init(recentBook: RecentBook) {
+        self.title = recentBook.title ?? ""
+        self.authors = (recentBook.authors ?? "").components(separatedBy: ",")
+        self.price = Int(recentBook.price)
+        self.thumbnail = recentBook.thumbnailImage
+        self.contents = recentBook.contents
+    }
+}

@@ -41,7 +41,6 @@ final class RecentBookCell: UICollectionViewCell {
     }
     
     func configure(with url: String?) {
-        print("RecentBookCell configure 호출! 이미지 url: \(url ?? "nil")")
         imageView.image = nil
         guard let url = url, let url = URL(string: url) else { return }
         DispatchQueue.global().async {

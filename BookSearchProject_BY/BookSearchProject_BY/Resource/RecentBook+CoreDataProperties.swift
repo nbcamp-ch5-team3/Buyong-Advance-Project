@@ -18,6 +18,10 @@ extension RecentBook {
 
     @NSManaged public var thumbnailImage: String?
     @NSManaged public var createdAt: Date?
+    @NSManaged public var title: String?
+    @NSManaged public var authors: String?
+    @NSManaged public var price: Int64
+    @NSManaged public var contents: String?
 
 }
 
