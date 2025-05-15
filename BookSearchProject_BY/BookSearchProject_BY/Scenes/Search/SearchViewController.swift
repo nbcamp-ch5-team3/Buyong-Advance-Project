@@ -54,13 +54,25 @@ final class SearchViewController: UIViewController {
         super.viewDidLoad()
         setup()
         bind()
+        addKeyboardObserver()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        removeKeyboardObserver()
     }
     
     private func setup() {
         view.addSubview(searchView)
+        setDelegate()
+        setupConstraints()
+    }
+    
+    private func setDelegate() {
         searchView.delegate = self
         searchView.setCollectionViewDelegate(self)
-        setupConstraints()
+        searchView.setSearchBarDelegate(self)
+        searchBar.delegate = self
     }
     
     private func setupConstraints() {
@@ -273,8 +285,13 @@ extension SearchView: UICollectionViewDataSource {
     
 }
 
-extension SearchView: UISearchBarDelegate {
+extension SearchViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        delegate?.searchView(self, didSearch: searchBar.text ?? "")
+        dismissKeyboard() // 키보드 내리기
+        searchVM.fetchBooks(query: searchBar.text ?? "")
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        dismissKeyboard() // 취소 버튼 클릭시 키보드 내리기
     }
 }
