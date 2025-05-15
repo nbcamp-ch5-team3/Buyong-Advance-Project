@@ -170,7 +170,7 @@ final class BookDetailModalView: UIView {
         self.isFromSavedTab = isFromSavedTab
         
         titleLabel.text = book.title
-        authorLabel.text = book.authors.joined(separator: " , ") + "지음"
+        authorLabel.text = book.authors.joined(separator: " , ")
         if let url = book.thumbnail, let url = URL(string: url) {
             thumbnailImageView.kf.setImage(with: url)
         }
