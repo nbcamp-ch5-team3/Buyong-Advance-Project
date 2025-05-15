@@ -20,6 +20,8 @@ extension SavedBook {
     @NSManaged public var author: String?
     @NSManaged public var price: Int64
     @NSManaged public var createdAt: Date?
+    @NSManaged public var thumbnailImage: String?
+    @NSManaged public var contents: String?
 
 }
 

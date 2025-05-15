@@ -13,7 +13,7 @@ final class CoreDataManager {
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     // CRUD : C
-    func saveBook(title: String, author: String, price: Int64) -> Bool {
+    func saveBook(title: String, author: String, price: Int64, thumbnail: String?, contents: String?) -> Bool {
         if isBookAlreadySaved(title: title, author: author) {
             return false
         }
@@ -22,6 +22,8 @@ final class CoreDataManager {
         newBook.title = title
         newBook.author = author
         newBook.price = price
+        newBook.thumbnailImage = thumbnail
+        newBook.contents = contents
         newBook.createdAt = Date()
         
         do {

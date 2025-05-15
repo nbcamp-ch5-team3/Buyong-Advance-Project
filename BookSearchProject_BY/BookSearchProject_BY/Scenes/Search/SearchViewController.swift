@@ -154,8 +154,20 @@ extension SearchViewController: SearchViewDelegate {
 
 // 담기 버튼 클릭 시 detailVC를 dismiss -> alert 띄우기
 extension SearchViewController: BookDetailModalDelegate {
-    func didSaveBook(title: String, author: String, price: Int64, isSaved: Bool) {
+    func didSaveBook(title: String, author: String, price: Int64, thumbnail: String?, contents: String?, isSaved: Bool) {
+        // 1. 현재 보고 있는 책의 RecentBook 찾기
+        if let thumbnail = thumbnail,
+           let recentBook = RecentBookManager.shared.fetchBook(thumbnail: thumbnail) {
+            
+            // 2. 최근 본 책을 맨 앞으로 이동
+            RecentBookManager.shared.moveRecentBookToFront(recentBook: recentBook)
+        }
+        
         presentedViewController?.dismiss(animated: true) { [weak self] in
+            // 3. UI 업데이트
+            self?.searchVM.fetchRecentBooks()
+            
+            // 4. 알림 표시
             let message = isSaved ? "\(title) 책 담기 완료!" : "이미 저장된 책이에요!"
             let alert = UIAlertController(
                 title: nil,

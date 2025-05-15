@@ -36,8 +36,8 @@ extension Book {
         self.title = savedBook.title ?? ""
         self.authors = [savedBook.author ?? ""]
         self.price = Int(savedBook.price)
-        self.thumbnail = nil
-        self.contents = nil
+        self.thumbnail = savedBook.thumbnailImage
+        self.contents = savedBook.contents         
     }
 }
 
