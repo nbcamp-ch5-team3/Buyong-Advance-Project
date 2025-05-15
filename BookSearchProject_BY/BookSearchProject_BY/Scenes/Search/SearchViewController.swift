@@ -55,6 +55,8 @@ final class SearchViewController: UIViewController {
         super.viewDidLoad()
         setup()
         bind()
+        searchView.getCollectionView.delegate = self
+        
     }
     
     private func setup() {
@@ -157,6 +159,20 @@ extension SearchViewController: BookDetailModalDelegate {
     }
 }
 
+// 무한 스크롤 트리거
+extension SearchViewController: UICollectionViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.size.height
+        
+        // 리스트 끝에서 100pt 이내 진입 시 추가 요청
+        if offsetY > contentHeight - frameHeight - 100 {
+            searchVM.loadMoreBooksIfNeeded()
+        }
+    }
+}
+
 extension SearchView: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return SearchSection.allCases.count
@@ -205,6 +221,9 @@ extension SearchView: UICollectionViewDataSource {
             let book = searchResults[indexPath.row]
             cell.configure(with: book)
             return cell
+            
+        case .none:
+            return UICollectionViewCell()
         }
     }
     
