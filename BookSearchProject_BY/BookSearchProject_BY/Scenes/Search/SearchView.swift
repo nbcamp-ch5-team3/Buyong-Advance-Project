@@ -48,6 +48,10 @@ final class SearchView: UIView {
         $0.dataSource = self
     }
     
+    var getCollectionView: UICollectionView {
+        collectionView
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         searchBar.delegate = self
