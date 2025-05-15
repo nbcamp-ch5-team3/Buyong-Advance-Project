@@ -50,7 +50,6 @@ final class SearchView: UIView {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        searchBar.delegate = self
         setup()
         reloadSearchResults()
     }
@@ -150,6 +149,10 @@ final class SearchView: UIView {
     
     func setCollectionViewDelegate(_ delegate: UICollectionViewDelegate) {
         collectionView.delegate = delegate
+    }
+    
+    func setSearchBarDelegate(_ delegate: UISearchBarDelegate) {
+        searchBar.delegate = delegate
     }
     
     // 데이터 갱신 함수
