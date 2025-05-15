@@ -44,13 +44,9 @@ final class SearchView: UIView {
         $0.register(SearchEmptyStateCell.self, forCellWithReuseIdentifier: SearchEmptyStateCell.id)
         $0.register(SearchResultCell.self, forCellWithReuseIdentifier: SearchResultCell.id)
         $0.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.id)
-        $0.delegate = self
         $0.dataSource = self
     }
     
-    var getCollectionView: UICollectionView {
-        collectionView
-    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -150,6 +146,10 @@ final class SearchView: UIView {
             make.top.equalTo(searchBar.snp.bottom).offset(15)
             make.bottom.leading.trailing.equalTo(self.safeAreaLayoutGuide)
         }
+    }
+    
+    func setCollectionViewDelegate(_ delegate: UICollectionViewDelegate) {
+        collectionView.delegate = delegate
     }
     
     // 데이터 갱신 함수

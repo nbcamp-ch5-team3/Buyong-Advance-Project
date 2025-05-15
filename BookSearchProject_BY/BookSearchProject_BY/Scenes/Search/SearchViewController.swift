@@ -18,7 +18,6 @@ protocol SearchViewDelegate: AnyObject {
 }
 
 final class SearchViewController: UIViewController {
-    
     private let searchView = SearchView()
     private let searchVM = SearchViewModel()
     private let disposeBag = DisposeBag()
@@ -55,13 +54,12 @@ final class SearchViewController: UIViewController {
         super.viewDidLoad()
         setup()
         bind()
-        searchView.getCollectionView.delegate = self
-        
     }
     
     private func setup() {
         view.addSubview(searchView)
         searchView.delegate = self
+        searchView.setCollectionViewDelegate(self)
         setupConstraints()
     }
     
@@ -94,6 +92,13 @@ final class SearchViewController: UIViewController {
             }).disposed(by: disposeBag)
     }
 }
+
+extension Collection {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
+
 
 extension SearchViewController: SearchViewDelegate {
     // 이미지 썸네일 클릭 시 모달 띄우기
@@ -149,7 +154,7 @@ extension SearchViewController: BookDetailModalDelegate {
             self?.present(alert, animated: true)
         }
     }
-
+    
     // 모달이 내려갔을 때 항상 최근 본 책 갱신
     func modalDidDismiss() {
         if shouldRefreshRecentBooksOnModalDismiss {
@@ -162,6 +167,7 @@ extension SearchViewController: BookDetailModalDelegate {
 // 무한 스크롤 트리거
 extension SearchViewController: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let frameHeight = scrollView.frame.size.height
@@ -169,6 +175,23 @@ extension SearchViewController: UICollectionViewDelegate {
         // 리스트 끝에서 100pt 이내 진입 시 추가 요청
         if offsetY > contentHeight - frameHeight - 100 {
             searchVM.loadMoreBooksIfNeeded()
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let section = SearchSection(rawValue: indexPath.section) else { return }
+        
+        switch section {
+        case .searchResults:
+            let book = searchResults[safe: indexPath.row]
+            if let book = book {
+                self.searchView(self.searchView, didSelectBook: book)
+            }
+        case .recentBooks:
+            let recentBook = recentBooks[safe: indexPath.row]
+            if let recentBook = recentBook {
+                self.searchView(self.searchView, didSelectRecentBook: recentBook)
+            }
         }
     }
 }
@@ -248,27 +271,6 @@ extension SearchView: UICollectionViewDataSource {
         return headerView
     }
     
-}
-
-extension SearchView: UICollectionViewDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let section = SearchSection(rawValue: indexPath.section) else { return }
-        
-        switch section {
-            // 검색결과 셀 클릭 시 이벤트 처리
-        case .searchResults:
-            guard !searchResults.isEmpty else { return }
-            guard indexPath.row < searchResults.count else { return }
-            let selectedBook = searchResults[indexPath.row]
-            delegate?.searchView(self, didSelectBook: selectedBook)
-            
-            // 최근 본 채썸네일 이미지 클릭 시 이벤트 처리
-        case .recentBooks:
-            guard indexPath.row < recentBooks.count else { return }
-            let selectedRecentBook = recentBooks[indexPath.row]
-            delegate?.searchView(self, didSelectRecentBook: selectedRecentBook)
-        }
-    }
 }
 
 extension SearchView: UISearchBarDelegate {
