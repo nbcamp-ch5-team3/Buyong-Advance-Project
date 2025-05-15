@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-final class SavedBooksViewController: UIViewController, SavedBooksViewDelegate {
+final class SavedBooksViewController: UIViewController, SavedBooksViewDelegate, BookDetailModalDelegate {
         
     private let savedBooksView = SavedBooksView()
     private var savedBooks: [Book] = []
@@ -85,6 +85,16 @@ final class SavedBooksViewController: UIViewController, SavedBooksViewDelegate {
             }
         }
     }
+    
+    // 이미 저장된 책이므로 여기서는 특별한 처리가 필요 없음
+    func didSaveBook(title: String, author: String, price: Int64, thumbnail: String?, contents: String?, isSaved: Bool) {
+        dismiss(animated: true)
+    }
+    
+    // 모달이 닫힐 때 데이터 갱신
+    func modalDidDismiss() {
+        fetchSavedBooks()
+    }
 }
 
 extension SavedBooksViewController: UITableViewDelegate, UITableViewDataSource {
@@ -132,5 +142,21 @@ extension SavedBooksViewController: UITableViewDelegate, UITableViewDataSource {
         }
         deleteAction.backgroundColor = .white
         return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // 빈 상태 셀이면 무시
+        guard !savedBooks.isEmpty else { return }
+        
+        // 선택된 책 정보로 모달 표시
+        let selectedBook = savedBooks[indexPath.row]
+        let detailVC = BookDetailModalViewController()
+        detailVC.configure(with: selectedBook, isFromSavedTab: true)
+        detailVC.delegate = self
+        detailVC.modalPresentationStyle = .pageSheet
+        present(detailVC, animated: true)
+        
+        // 선택 표시 해제
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }

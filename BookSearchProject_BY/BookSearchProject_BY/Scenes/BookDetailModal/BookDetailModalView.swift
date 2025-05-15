@@ -11,6 +11,7 @@ import Then
 import Kingfisher
 
 final class BookDetailModalView: UIView {
+    private var book: Book?
     
     private let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = true
@@ -73,6 +74,22 @@ final class BookDetailModalView: UIView {
         $0.setTitle("담기", for: .normal)
         $0.backgroundColor = .systemBlue
         $0.layer.cornerRadius = 8
+    }
+    
+    // 저장된 탭에서 열었는지 여부를 저장할 프로퍼티 추가
+    private var isFromSavedTab: Bool = false
+    
+    // 기존 버튼 설정을 메서드로 분리
+    private func configureSaveButton() {
+        if isFromSavedTab {
+            saveButton.setTitle("저장됨", for: .normal)
+            saveButton.backgroundColor = .systemGray3
+            saveButton.isEnabled = false
+        } else {
+            saveButton.setTitle("담기", for: .normal)
+            saveButton.backgroundColor = .systemBlue
+            saveButton.isEnabled = true
+        }
     }
     
     override init(frame: CGRect) {
@@ -148,13 +165,17 @@ final class BookDetailModalView: UIView {
     }
     
     // Book 모델을 받아서 데이터를 세팅
-    func configure(with book: Book) {
+    func configure(with book: Book, isFromSavedTab: Bool = false) {
+        self.book = book
+        self.isFromSavedTab = isFromSavedTab
+        
         titleLabel.text = book.title
-        authorLabel.text = book.authors.joined(separator: " , ") + "지음"
+        authorLabel.text = book.authors.joined(separator: " , ")
         if let url = book.thumbnail, let url = URL(string: url) {
             thumbnailImageView.kf.setImage(with: url)
         }
         priceLabel.text = "가격: \(book.price.decimalFormatted)원"
         contentsLabel.text = book.contents
+        configureSaveButton() // 버튼 설정 적용
     }
 }

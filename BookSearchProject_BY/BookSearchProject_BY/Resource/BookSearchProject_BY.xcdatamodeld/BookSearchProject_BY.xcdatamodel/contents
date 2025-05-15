@@ -10,8 +10,10 @@
     </entity>
     <entity name="SavedBook" representedClassName="SavedBook" syncable="YES">
         <attribute name="author" optional="YES" attributeType="String"/>
+        <attribute name="contents" optional="YES" attributeType="String"/>
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="price" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="thumbnailImage" optional="YES" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
     </entity>
 </model>
