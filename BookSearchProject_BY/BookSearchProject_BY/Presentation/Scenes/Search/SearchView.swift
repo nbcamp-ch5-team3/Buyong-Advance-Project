@@ -9,25 +9,18 @@ import UIKit
 
 import SnapKit
 import Then
+import RxCocoa
+import Kingfisher
 
 final class SearchView: UIView {
     
+    // MARK: - Properties
     weak var delegate: SearchViewDelegate?
+    private(set) var searchResults: [Book] = []
+    private(set) var recentBooks: [RecentBook] = []
     
-    // 책 목록이 바뀌면 검색 결과 부분만 새로고침(View 내부에서 UI 새로고침)
-    var searchResults: [Book] = [] {
-        didSet {
-            collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
-        }
-    }
-    
-    var recentBooks: [RecentBook] = [] {
-        didSet {
-            collectionView.reloadSections(IndexSet(integer: SearchSection.recentBooks.rawValue))
-        }
-    }
-    
-    var searchBar = UISearchBar().then {
+    // MARK: - UI Components
+    private(set) var searchBar = UISearchBar().then {
         $0.placeholder = "검색어를 입력하세요"
         $0.searchTextField.backgroundColor = .secondarySystemBackground
         $0.searchBarStyle = .minimal
@@ -39,15 +32,12 @@ final class SearchView: UIView {
         textField.font = UIFont.systemFont(ofSize: 17)
     }
     
-    private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
-        $0.register(RecentBookCell.self, forCellWithReuseIdentifier: RecentBookCell.id)
-        $0.register(SearchEmptyStateCell.self, forCellWithReuseIdentifier: SearchEmptyStateCell.id)
-        $0.register(SearchResultCell.self, forCellWithReuseIdentifier: SearchResultCell.id)
-        $0.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.id)
+    private(set) lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout()).then {
+        $0.backgroundColor = .clear
         $0.dataSource = self
     }
     
-    
+    // MARK: - Initialization
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
@@ -58,10 +48,19 @@ final class SearchView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Setup
     private func setup() {
         self.backgroundColor = .systemBackground
         [ searchBar, collectionView ].forEach { self.addSubview($0) }
         setupConstraints()
+        setupRegiserCells()
+    }
+    
+    private func setupRegiserCells() {
+        collectionView.register(RecentBookCell.self, forCellWithReuseIdentifier: RecentBookCell.id)
+        collectionView.register(SearchEmptyStateCell.self, forCellWithReuseIdentifier: SearchEmptyStateCell.id)
+        collectionView.register(SearchResultCell.self, forCellWithReuseIdentifier: SearchResultCell.id)
+        collectionView.register(SectionHeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: SectionHeaderView.id)
     }
     
     private func createLayout() -> UICollectionViewLayout {
@@ -147,20 +146,13 @@ final class SearchView: UIView {
         }
     }
     
-    func setCollectionViewDelegate(_ delegate: UICollectionViewDelegate) {
-        collectionView.delegate = delegate
-    }
-    
-    func setSearchBarDelegate(_ delegate: UISearchBarDelegate) {
-        searchBar.delegate = delegate
-    }
-    
+    // MARK: - Private Methods
     // 데이터 갱신 함수
-    func reloadSearchResults() {
+    private func reloadSearchResults() {
         collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
     }
     
-    func reloadRecentBooks(oldBooks: [RecentBook], newBooks: [RecentBook]) {
+    private func reloadRecentBooks(oldBooks: [RecentBook], newBooks: [RecentBook]) {
         guard oldBooks.count == newBooks.count else { return }
         for i in 0..<newBooks.count {
             if oldBooks[i] != newBooks[i] {
@@ -169,23 +161,27 @@ final class SearchView: UIView {
             }
         }
     }
-}
-
-extension SearchView: SearchViewPresentation {
-    func updateSearchResults(_ books: [Book]) {
-        self.searchResults = books
-        reloadSearchResults()
-        books.isEmpty ? showEmptyState() : hideEmptyState()
+    
+    // MARK: - Public Methods
+    func configure(delegate: SearchViewDelegate?) {
+        self.delegate = delegate
     }
     
-    func updateRecentBooks(_ books: [RecentBook], oldBooks: [RecentBook]) {
-        self.recentBooks = books
-        reloadRecentBooks(oldBooks: oldBooks, newBooks: books)
-    }
-    
-    private func showEmptyState() {
-        searchResults = []
+    func update(searchResults: [Book]) {
+        self.searchResults = searchResults
         collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
     }
     
+    func update(recentBooks: [RecentBook]) {
+        self.recentBooks = recentBooks
+        collectionView.reloadSections(IndexSet(integer: SearchSection.recentBooks.rawValue))
+    }
+    
+    func setCollectionViewDelegate(_ delegate: UICollectionViewDelegate) {
+        collectionView.delegate = delegate
+    }
+    
+    func setSearchBarDelegate(_ delegate: UISearchBarDelegate) {
+        searchBar.delegate = delegate
+    }
 }

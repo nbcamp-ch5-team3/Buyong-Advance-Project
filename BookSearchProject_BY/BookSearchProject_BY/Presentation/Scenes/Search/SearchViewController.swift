@@ -34,16 +34,14 @@ final class SearchViewController: UIViewController {
     // 책 목록이 바뀌면 콜렉션뷰 새로고침(VC → View로 데이터 전달)
     private var searchResults: [Book] = [] {
         didSet {
-            searchView.searchResults = searchResults
-            searchView.reloadSearchResults()
+            searchView.update(searchResults: searchResults)
         }
     }
     
     // 썸네일 이미지 클릭 시 새로고침
     private var recentBooks: [RecentBook] = [] {
         didSet {
-            searchView.recentBooks = recentBooks
-            searchView.reloadRecentBooks(oldBooks: oldValue, newBooks: recentBooks)
+            searchView.update(recentBooks: recentBooks)
         }
     }
     
@@ -85,7 +83,7 @@ final class SearchViewController: UIViewController {
     }
     
     private func setDelegate() {
-        searchView.delegate = self
+        searchView.configure(delegate: self)
         searchView.setCollectionViewDelegate(self)
         searchView.setSearchBarDelegate(self)
         searchBar.delegate = self
@@ -141,17 +139,14 @@ extension Collection {
 
 
 extension SearchViewController: SearchViewDelegate {
-    // 이미지 썸네일 클릭 시 모달 띄우기
-    func searchView(_ searchView: SearchView, didSelectRecentBook recentBook: RecentBook) {
-        // 1. 최근 본 책을 맨 앞으로 이동 (createdAt 갱신)
-        RecentBookManager.shared.moveRecentBookToFront(recentBook: recentBook)
+    func searchView(_ searchView: SearchView, didSearch text: String) {
+        searchVM.fetchBooks(query: text)
+    }
+    
+    func searchView(_ searchView: SearchView, didSelectBook book: Book) {
+        shouldRefreshRecentBooksOnModalDismiss = true
+        RecentBookManager.shared.saveRecentBook(book: book)
         
-        // 2. UI 갱신 (fetch해서 최신순으로 다시 불러오기)
-        searchVM.fetchRecentBooks()
-        
-        // 3. 모달 띄우기 (모달 닫힐때 UI 갱신 x)
-        shouldRefreshRecentBooksOnModalDismiss = false
-        let book = Book(recentBook: recentBook)
         let detailVC = BookDetailModalViewController()
         detailVC.configure(with: book)
         detailVC.delegate = self
@@ -159,19 +154,12 @@ extension SearchViewController: SearchViewDelegate {
         present(detailVC, animated: true)
     }
     
-    
-    // 1. 검색 버튼 클릭 -> VM에 검색 요청
-    func searchView(_ searchView: SearchView, didSearch text: String) {
-        searchVM.fetchBooks(query: text)
-    }
-    
-    // detailVC.configure(with: book)
-    func searchView(_ searchView: SearchView, didSelectBook book: Book) {
-        // 1. 최근 본 책 저장
-        shouldRefreshRecentBooksOnModalDismiss = true
-        RecentBookManager.shared.saveRecentBook(book: book)
+    func searchView(_ searchView: SearchView, didSelectRecentBook recentBook: RecentBook) {
+        RecentBookManager.shared.moveRecentBookToFront(recentBook: recentBook)
+        searchVM.fetchRecentBooks()
         
-        // 2. 모달 띄우기
+        shouldRefreshRecentBooksOnModalDismiss = false
+        let book = Book(recentBook: recentBook)
         let detailVC = BookDetailModalViewController()
         detailVC.configure(with: book)
         detailVC.delegate = self
