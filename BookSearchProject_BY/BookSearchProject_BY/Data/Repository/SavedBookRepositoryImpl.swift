@@ -58,11 +58,11 @@ extension SavedBookRepositoryImpl {
         var errorDescription: String? {
             switch self {
             case .saveFailed:
-                return "책 저장에 실패했습니다."
+                return "책 저장에 실패했어요."
             case .fetchFailed:
-                return "저장된 책 목록을 불러오는데 실패했습니다."
+                return "저장된 책 목록을 불러오는데 실패했어요."
             case .deleteFailed:
-                return "책 삭제에 실패했습니다."
+                return "책 삭제에 실패했어요."
             case .duplicateBook:
                 return "이미 저장된 책이에요!"
             }
