@@ -182,10 +182,6 @@ final class SearchView: UIView {
     func setCollectionViewDelegate(_ delegate: UICollectionViewDelegate) {
         collectionView.delegate = delegate
     }
-    
-    func setSearchBarDelegate(_ delegate: UISearchBarDelegate) {
-        searchBar.delegate = delegate
-    }
 }
 
 extension SearchView: UICollectionViewDataSource {

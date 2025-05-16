@@ -85,8 +85,6 @@ final class SearchViewController: UIViewController {
     private func setDelegate() {
         searchView.configure(delegate: self)
         searchView.setCollectionViewDelegate(self)
-        searchView.setSearchBarDelegate(self)
-        searchBar.delegate = self
     }
     
     private func setupConstraints() {
@@ -98,9 +96,31 @@ final class SearchViewController: UIViewController {
     // MARK: - Binding
     /// 뷰모델 바인딩 설정
     private func bindViewModel() {
+        bindSearchBar()
         bindSearchResults()
         bindRecentBooks()
         bindError()
+        bindTapGesture()
+    }
+    
+    // 검색어 입력 후 검색 버튼 클릭 시 이벤트
+    private func bindSearchBar() {
+        searchBar.rx.searchButtonClicked
+            .withLatestFrom(searchBar.rx.text.orEmpty)    // 최신 검색어 가져오기
+            .do(onNext: { [weak self] _ in
+                self?.dismissKeyboard()    // 키보드 숨기기
+            })
+            .bind(onNext: { [weak self] query in
+                self?.searchVM.fetchBooks(query: query)
+            })
+            .disposed(by: disposeBag)
+        
+        // 취소 버튼 클릭 시 이벤트
+        searchBar.rx.cancelButtonClicked
+            .bind(onNext: { [weak self] in
+                self?.dismissKeyboard()
+            })
+            .disposed(by: disposeBag)
     }
     
     /// 검색 결과 바인딩
@@ -128,6 +148,17 @@ final class SearchViewController: UIViewController {
             .subscribe(onNext: { error in
                 print("에러 발생: \(error)")
             }).disposed(by: disposeBag)
+    }
+    
+    /// UIControl 이벤트를 Rx로 바인딩 (빈 공간 터치 시 키보드 내려가도록 설정)
+    private func bindTapGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc override func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
 
@@ -232,16 +263,5 @@ extension SearchViewController: UICollectionViewDelegate {
                 self.searchView(self.searchView, didSelectRecentBook: recentBook)
             }
         }
-    }
-}
-
-extension SearchViewController: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        dismissKeyboard() // 키보드 내리기
-        searchVM.fetchBooks(query: searchBar.text ?? "")
-    }
-    
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        dismissKeyboard() // 취소 버튼 클릭시 키보드 내리기
     }
 }
