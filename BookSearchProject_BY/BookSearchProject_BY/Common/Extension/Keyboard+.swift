@@ -21,7 +21,7 @@ extension UIViewController {
     
     /// 옵저버 제거
     func removeKeyboardObserver() {
-        view.gestureRecognizers?.removeAll() // 제스처 제거
+        view.gestureRecognizers?.removeAll()
     }
     
     /// 화면 터치시 키보드 내리기

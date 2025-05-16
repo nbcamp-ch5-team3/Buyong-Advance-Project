@@ -18,6 +18,7 @@ final class SavedBooksViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     // MARK: - Initialization
+    /// 뷰 컨트롤러 초기화
     init(savedBooksVM: SavedBooksViewModel = SavedBooksViewModel()) {
         self.savedBooksVM = savedBooksVM
         super.init(nibName: nil, bundle: nil)
@@ -39,7 +40,8 @@ final class SavedBooksViewController: UIViewController {
         setTableView()
         bindViewModel()
     }
-    // MARK: - setup Methods
+    
+    // MARK: - setup
     private func setup() {
         view.addSubview(savedBooksView)
         savedBooksView.snp.makeConstraints { make in
@@ -47,14 +49,21 @@ final class SavedBooksViewController: UIViewController {
         }
     }
     
+    /// 테이블뷰 셀 할당
     private func setTableView() {
         savedBooksView.tableView.register(SavedBooksTableViewCell.self, forCellReuseIdentifier: SavedBooksTableViewCell.id)
         savedBooksView.tableView.register(SavedEmptyStateCell.self, forCellReuseIdentifier: SavedEmptyStateCell.id)
     }
     
     // MARK: - Binding
+    /// 뷰모델 바인딩 설정
     private func bindViewModel() {
-        // Input
+        bindInputs()
+        bindOutputs()
+    }
+
+    /// 입력 바인딩 설정
+    private func bindInputs() {
         savedBooksView.deleteAllButton.rx.tap
             .subscribe(onNext: { [weak self] in
                 self?.showDeleteAllAlert()
@@ -66,8 +75,17 @@ final class SavedBooksViewController: UIViewController {
                 self?.navigateToSearch()
             })
             .disposed(by: disposeBag)
-        
-        // Output
+    }
+    
+    /// 출력 바인딩 설정
+    private func bindOutputs() {
+        bindTableView()
+        bindTableViewSelection()
+        bindTableViewDeletion()
+    }
+    
+    /// 테이블뷰 데이터 바인딩
+    private func bindTableView() {
         savedBooksVM.books
             .bind(to: savedBooksView.tableView.rx.items) { [weak self] tableView, row, item in
                 guard let self = self else {
@@ -84,8 +102,10 @@ final class SavedBooksViewController: UIViewController {
                 }
             }
             .disposed(by: disposeBag)
-        
-        // Cell 선택
+    }
+    
+    /// 테이블뷰 선택 이벤트 바인딩
+    private func bindTableViewSelection() {
         savedBooksView.tableView.rx.itemSelected
             .subscribe(onNext: { [weak self] indexPath in
                 guard let self = self,
@@ -96,8 +116,10 @@ final class SavedBooksViewController: UIViewController {
                 self.savedBooksView.tableView.deselectRow(at: indexPath, animated: true)
             })
             .disposed(by: disposeBag)
-        
-        // 스와이프 삭제 처리
+    }
+                
+    /// 테이블뷰 삭제 이벤트 바인딩
+    private func bindTableViewDeletion() {
         savedBooksView.tableView.rx.itemDeleted
             .subscribe(onNext: { [weak self] indexPath in
                 guard let self = self,
@@ -109,7 +131,8 @@ final class SavedBooksViewController: UIViewController {
     }
     
     
-    // MARK: - private Methods
+    // MARK: - Helper Methods
+    /// 전체 삭제 확인 알림창 표시
     private func showDeleteAllAlert() {
         let alert = UIAlertController(
             title: "전체 삭제",
@@ -128,6 +151,7 @@ final class SavedBooksViewController: UIViewController {
         present(alert, animated: true)
     }
     
+    /// 검색 화면으로 이동
     private func navigateToSearch() {
         tabBarController?.selectedIndex = 0
         if let searchVC = tabBarController?.viewControllers?.first as? SearchViewController {
@@ -137,6 +161,7 @@ final class SavedBooksViewController: UIViewController {
         }
     }
     
+    /// 책 상세 정보 모달 표시
     private func showDetailModal(for book: Book) {
         let detailVC = BookDetailModalViewController()
         detailVC.configure(with: book, isFromSavedTab: true)

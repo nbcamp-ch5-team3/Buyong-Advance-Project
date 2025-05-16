@@ -9,15 +9,10 @@ import UIKit
 import SnapKit
 import Then
 
-protocol SavedBooksViewDelegate: AnyObject {
-    func didTapDeleteAllButton()
-    func didTapAddBookButton()
-}
-
+/// 저장된 책 목록을 표시하는 메인 뷰
 final class SavedBooksView: UIView {
-    
-    weak var delegate: SavedBooksViewDelegate?
-    
+
+    // MARK: - UI Components
     let tableView = UITableView().then {
         $0.backgroundColor = .clear
         $0.separatorStyle = .none
@@ -51,21 +46,31 @@ final class SavedBooksView: UIView {
         $0.setTitle("책 추가", for: .normal)
     }
     
+    // MARK: - Lifecycle
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
-        setupButtonAction()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Setup
     private func setup() {
         self.backgroundColor = .systemBackground
+        setupSubviews()
+        setupConstraints()
+    }
+    
+    /// 서브뷰 설정
+    private func setupSubviews() {
         [deleteAllButton, headerLabel, addBookButton].forEach { headerStackView.addArrangedSubview($0) }
         [headerStackView, tableView].forEach { self.addSubview($0) }
-        
+    }
+    
+    ///오토레이아웃 설정
+    private func setupConstraints() {
         headerStackView.snp.makeConstraints { make in
             make.top.equalTo(self.safeAreaLayoutGuide)
             make.leading.trailing.equalToSuperview().inset(25)
@@ -79,18 +84,5 @@ final class SavedBooksView: UIView {
             make.top.equalTo(headerStackView.snp.bottom).offset(15)
             make.bottom.leading.trailing.equalTo(self.safeAreaLayoutGuide)
         }
-    }
-    
-    private func setupButtonAction() {
-        deleteAllButton.addTarget(self, action: #selector(deleteAllButtonTapped), for: .touchUpInside)
-        addBookButton.addTarget(self, action: #selector(addBookButtonTapped), for: .touchUpInside)
-    }
-    
-    @objc private func deleteAllButtonTapped() {
-        delegate?.didTapDeleteAllButton()
-    }
-
-    @objc private func addBookButtonTapped() {
-        delegate?.didTapAddBookButton()
     }
 }

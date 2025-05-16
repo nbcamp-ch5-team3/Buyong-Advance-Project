@@ -5,6 +5,7 @@
 //  Created by iOS study on 5/16/25.
 //
 
+/// 책 정보를 나타내는 구조체 모델
 struct Book: Decodable {
     let title: String
     let authors: [String]
@@ -13,7 +14,8 @@ struct Book: Decodable {
     let contents: String?
 }
 
-// CoreData → Book 변환을 위한 이니셜라이저 추가
+// MARK: - CoreData Conversion
+/// CoreData의 SavedBook 엔티티로부터 Book 인스턴스를 생성하는 이니셜라이저
 extension Book {
     init(savedBook: SavedBook) {
         self.title = savedBook.title ?? ""
@@ -24,6 +26,8 @@ extension Book {
     }
 }
 
+// MARK: - RecentBook Conversion
+/// CoreData의 RecentBook 엔티티로부터 Book 인스턴스를 생성하는 이니셜라이저
 extension Book {
     init(recentBook: RecentBook) {
         self.title = recentBook.title ?? ""

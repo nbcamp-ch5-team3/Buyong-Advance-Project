@@ -15,6 +15,8 @@ final class SavedBookRepositoryImpl: SavedBookRepository {
         self.coreDataManager = coreDataManager
     }
     
+    /// 새로운 책을 Core Data에 저장하는 메서드
+    /// - Returns: 저장 성공 시 true, 실패 또는 중복 시 false
     func saveBook(title: String, author: String, price: Int64, thumbnail: String?, contents: String?) -> Bool {
         // 중복 체크 후 저장
         if isBookAlreadySaved(title: title, author: author) {
@@ -30,24 +32,31 @@ final class SavedBookRepositoryImpl: SavedBookRepository {
         )
     }
     
+    /// Core Data에서 저장된 모든 책을 조회하는 메서드
+    /// - Returns: 저장된 책 목록 배열
     func fetchBooks() -> [SavedBook] {
         return coreDataManager.fetchBooks()
     }
     
+    /// Core Data에서 특정 책을 삭제하는 메서드
+    /// - Parameter book: 삭제할 SavedBook 객체
     func deleteBook(_ book: SavedBook) {
         coreDataManager.deleteBook(book)
     }
     
+    /// Core Data에서 저장된 모든 책을 삭제하는 메서드
     func deleteAllBooks() {
         coreDataManager.deleteAllBooks()
     }
     
+    /// 책이 이미 저장되어 있는지 확인하는 메서드
     func isBookAlreadySaved(title: String, author: String) -> Bool {
         return coreDataManager.isBookAlreadySaved(title: title, author: author)
     }
 }
 
 // MARK: - Error Handling
+/// 저장된 책 관련 작업 중 발생할 수 있는 에러 정의
 extension SavedBookRepositoryImpl {
     enum SavedBookRepositoryError: LocalizedError {
         case saveFailed

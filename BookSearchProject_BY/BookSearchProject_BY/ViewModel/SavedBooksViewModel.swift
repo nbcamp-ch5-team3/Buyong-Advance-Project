@@ -11,31 +11,36 @@ import RxRelay
 
 final class SavedBooksViewModel {
     // MARK: - Properties
+    /// UseCase 인스턴스
     private let useCase: SavedBookUseCase
     private let disposeBag = DisposeBag()
     
-    // Output
+    // MARK: - Outputs (저장된 책 목록,  에러 메시지)
     let books = BehaviorRelay<[Book]>(value: [])
     let showError = PublishRelay<String>()
     
     // MARK: - Initialization
+    /// 뷰모델 초기화
     init(useCase: SavedBookUseCase = SavedBookUseCase(repository: SavedBookRepositoryImpl())) {
         self.useCase = useCase
     }
     
     // MARK: - Public Methods
+    /// 저장된 모든 책 불러오기
     func fetchBooks() {
         let savedBooks = useCase.fetchBooks()
         let mappedBooks = savedBooks.map { Book(savedBook: $0) }
         books.accept(mappedBooks)
     }
     
+    /// 특정 인덱스의 책 삭제
     func deleteBook(at index: Int) {
         guard let savedBook = useCase.fetchBooks()[safe: index] else { return }
         useCase.deleteBook(savedBook)
         fetchBooks()
     }
     
+    /// 저장된 모든 책 삭제
     func deleteAllBooks() {
         useCase.deleteAllBooks()
         books.accept([])
