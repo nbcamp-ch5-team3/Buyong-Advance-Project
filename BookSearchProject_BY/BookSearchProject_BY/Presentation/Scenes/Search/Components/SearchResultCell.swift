@@ -66,7 +66,7 @@ final class SearchResultCell: UICollectionViewCell {
             make.leading.greaterThanOrEqualTo(titleLabel.snp.trailing).offset(8)
             make.centerY.equalToSuperview()
             make.trailing.equalToSuperview().inset(12)
-            make.width.greaterThanOrEqualTo(60)
+            make.width.equalTo(70)
         }
     }
 

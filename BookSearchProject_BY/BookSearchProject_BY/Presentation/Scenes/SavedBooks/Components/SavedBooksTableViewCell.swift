@@ -38,6 +38,14 @@ final class SavedBooksTableViewCell: UITableViewCell {
         $0.textAlignment = .right
     }
     
+    // 셀 재사용 시 레이아웃 초기화
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        titleLabel.text = nil
+        authorLabel.text = nil
+        priceLabel.text = nil
+    }
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         backgroundColor = .systemBackground
@@ -50,7 +58,6 @@ final class SavedBooksTableViewCell: UITableViewCell {
     
     private func setup() {
         backgroundColor = .systemBackground
-
         selectionStyle = .none
 
         contentView.addSubview(containerView)
@@ -63,8 +70,8 @@ final class SavedBooksTableViewCell: UITableViewCell {
         priceLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
         
         containerView.snp.makeConstraints { make in
-            make.top.bottom.equalToSuperview().inset(5)
-            make.leading.trailing.equalToSuperview().inset(25)
+            make.edges.equalToSuperview().inset(UIEdgeInsets(top: 5, left: 25, bottom: 5, right: 25))
+            make.height.equalTo(80)
         }
         
         titleLabel.snp.makeConstraints { make in
@@ -78,11 +85,12 @@ final class SavedBooksTableViewCell: UITableViewCell {
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
             make.bottom.equalToSuperview().inset(12)
         }
+        
         priceLabel.snp.makeConstraints { make in
             make.leading.greaterThanOrEqualTo(titleLabel.snp.trailing).offset(8)
             make.centerY.equalToSuperview()
             make.trailing.equalToSuperview().inset(12)
-            make.width.greaterThanOrEqualTo(60)
+            make.width.equalTo(70)
         }
     }
     

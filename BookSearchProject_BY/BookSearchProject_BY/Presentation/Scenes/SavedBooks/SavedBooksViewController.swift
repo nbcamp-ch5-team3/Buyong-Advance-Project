@@ -1,0 +1,174 @@
+//
+//  SavedBooksViewController.swift
+//  BookSearchProject_BY
+//
+//  Created by iOS study on 5/9/25.
+//
+
+import UIKit
+import SnapKit
+import RxSwift
+import RxCocoa
+
+final class SavedBooksViewController: UIViewController {
+    
+    // MARK: - Properties
+    private let savedBooksView = SavedBooksView()
+    private let savedBooksVM: SavedBooksViewModel
+    private let disposeBag = DisposeBag()
+    
+    // MARK: - Initialization
+    init(savedBooksVM: SavedBooksViewModel = SavedBooksViewModel()) {
+        self.savedBooksVM = savedBooksVM
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Lifecycle
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        savedBooksVM.fetchBooks()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setup()
+        setTableView()
+        bindViewModel()
+    }
+    // MARK: - setup Methods
+    private func setup() {
+        view.addSubview(savedBooksView)
+        savedBooksView.snp.makeConstraints { make in
+            make.top.bottom.leading.trailing.equalToSuperview()
+        }
+    }
+    
+    private func setTableView() {
+        savedBooksView.tableView.register(SavedBooksTableViewCell.self, forCellReuseIdentifier: SavedBooksTableViewCell.id)
+        savedBooksView.tableView.register(SavedEmptyStateCell.self, forCellReuseIdentifier: SavedEmptyStateCell.id)
+    }
+    
+    // MARK: - Binding
+    private func bindViewModel() {
+        // Input
+        savedBooksView.deleteAllButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.showDeleteAllAlert()
+            })
+            .disposed(by: disposeBag)
+        
+        savedBooksView.addBookButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                self?.navigateToSearch()
+            })
+            .disposed(by: disposeBag)
+        
+        // Output
+        savedBooksVM.books
+            .bind(to: savedBooksView.tableView.rx.items) { [weak self] tableView, row, item in
+                guard let self = self else {
+                    return UITableViewCell()
+                }
+                
+                if self.savedBooksVM.books.value.isEmpty {
+                    let cell = tableView.dequeueReusableCell(withIdentifier: SavedEmptyStateCell.id, for: IndexPath(row: row, section: 0)) as! SavedEmptyStateCell
+                    return cell
+                } else {
+                    let cell = tableView.dequeueReusableCell(withIdentifier: SavedBooksTableViewCell.id, for: IndexPath(row: row, section: 0)) as! SavedBooksTableViewCell
+                    cell.configure(with: item)
+                    return cell
+                }
+            }
+            .disposed(by: disposeBag)
+        
+        // Cell 선택
+        savedBooksView.tableView.rx.itemSelected
+            .subscribe(onNext: { [weak self] indexPath in
+                guard let self = self,
+                      !self.savedBooksVM.books.value.isEmpty else { return }
+                
+                let book = self.savedBooksVM.books.value[indexPath.row]
+                self.showDetailModal(for: book)
+                self.savedBooksView.tableView.deselectRow(at: indexPath, animated: true)
+            })
+            .disposed(by: disposeBag)
+        
+        // 스와이프 삭제 처리
+        savedBooksView.tableView.rx.itemDeleted
+            .subscribe(onNext: { [weak self] indexPath in
+                guard let self = self,
+                      !self.savedBooksVM.books.value.isEmpty else { return }
+                
+                self.savedBooksVM.deleteBook(at: indexPath.row)
+            })
+            .disposed(by: disposeBag)
+    }
+    
+    
+    // MARK: - private Methods
+    private func showDeleteAllAlert() {
+        let alert = UIAlertController(
+            title: "전체 삭제",
+            message: "저장된 모든 책을 삭제하시겠습니까?",
+            preferredStyle: .alert
+        )
+        
+        let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.savedBooksVM.deleteAllBooks()
+        }
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel)
+        
+        [deleteAction, cancelAction].forEach { alert.addAction($0) }
+        
+        present(alert, animated: true)
+    }
+    
+    private func navigateToSearch() {
+        tabBarController?.selectedIndex = 0
+        if let searchVC = tabBarController?.viewControllers?.first as? SearchViewController {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                searchVC.searchBar.becomeFirstResponder()
+            }
+        }
+    }
+    
+    private func showDetailModal(for book: Book) {
+        let detailVC = BookDetailModalViewController()
+        detailVC.configure(with: book, isFromSavedTab: true)
+        detailVC.delegate = self
+        detailVC.modalPresentationStyle = .pageSheet
+        present(detailVC, animated: true)
+    }
+}
+
+// MARK: - BookDetailModalDelegate
+extension SavedBooksViewController: BookDetailModalDelegate {
+    func didSaveBook(title: String, author: String, price: Int64, thumbnail: String?, contents: String?, isSaved: Bool) {
+        dismiss(animated: true)
+    }
+    
+    func modalDidDismiss() {
+    }
+}
+
+
+// MARK: - UITableViewDelegate
+extension SavedBooksViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        // 빈 상태 셀일 경우 스와이프 비활성화
+        guard !savedBooksVM.books.value.isEmpty else { return nil }
+        
+        let deleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] (action, view, completion) in
+            self?.savedBooksVM.deleteBook(at: indexPath.row)
+            completion(true)
+        }
+        
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        return configuration
+    }
+}

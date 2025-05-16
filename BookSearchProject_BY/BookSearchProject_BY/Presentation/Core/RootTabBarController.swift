@@ -22,11 +22,22 @@ final class RootTabBarController: UITabBarController {
         self.tabBar.unselectedItemTintColor = .gray
     }
 
+    // Search Tab
     private func createTabBarControllers() -> [UIViewController] {
-        let searchVC = createTabBarItem(viewController: SearchViewController(), title: "Search", imageName: "magnifyingglass")
-        let SavedBooksVC = createTabBarItem(viewController: SavedBooksViewController(), title: "SavedBooks", imageName: "books.vertical")
+        let searchVC = createTabBarItem(viewController: SearchViewController(),
+                                        title: "Search",
+                                        imageName: "magnifyingglass"
+        )
         
-        return [searchVC, SavedBooksVC]
+        // SavedBooks Tab
+        let savedBooksVC = SavedBooksViewController() // 기본 초기화 사용
+        let savedBooksNavController = createTabBarItem(
+            viewController: UINavigationController(rootViewController: savedBooksVC),
+            title: "SavedBooks",
+            imageName: "books.vertical"
+        )
+        
+        return [searchVC, savedBooksNavController]
     }
     
     private func createTabBarItem(viewController: UIViewController, title: String, imageName: String) -> UIViewController {

@@ -22,7 +22,6 @@ final class SavedBooksView: UIView {
         $0.backgroundColor = .clear
         $0.separatorStyle = .none
         $0.showsVerticalScrollIndicator = false
-        $0.rowHeight = 90
     }
     
     private let headerStackView = UIStackView().then {
@@ -39,13 +38,13 @@ final class SavedBooksView: UIView {
         $0.textAlignment = .center
     }
     
-    private let deleteAllButton = UIButton().then {
+    private(set) var deleteAllButton = UIButton().then {
         $0.setTitleColor(.systemRed, for: .normal)
         $0.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
         $0.setTitle("전체 삭제", for: .normal)
     }
     
-    private let addBookButton = UIButton().then {
+    private(set) var addBookButton = UIButton().then {
         $0.setTitleColor(.systemGreen, for: .normal)
         $0.tintColor = .label
         $0.titleLabel?.font = .systemFont(ofSize: 17, weight: .bold)
@@ -68,9 +67,9 @@ final class SavedBooksView: UIView {
         [headerStackView, tableView].forEach { self.addSubview($0) }
         
         headerStackView.snp.makeConstraints { make in
-            make.top.equalTo(self.safeAreaLayoutGuide).offset(25)
+            make.top.equalTo(self.safeAreaLayoutGuide)
             make.leading.trailing.equalToSuperview().inset(25)
-            make.height.equalTo(30)
+            make.height.equalTo(44)
         }
         
         deleteAllButton.snp.makeConstraints { $0.width.equalTo(80) }
