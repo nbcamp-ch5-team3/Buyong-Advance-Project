@@ -46,7 +46,7 @@ final class SearchViewModel {
             return
         }
         
-        /// &page=\(page) 파라미터 추가 -> 무한 스크롤
+        // page 파라미터 추가(무한 스크롤)
         let url = "https://dapi.kakao.com/v3/search/book?query=\(queryEncoded)&page=\(page)"
         
         let headers: HTTPHeaders = [
@@ -76,13 +76,13 @@ final class SearchViewModel {
             .disposed(by: disposeBag)
     }
     
-    /// 최근 본 책 목록 불러오기
+    // ===== 최근 본 책 읽기 =====
     func fetchRecentBooks() {
         let books = RecentBookManager.shared.fetchAllBooks()
         recentBooks.onNext(books)
     }
     
-    /// 무한 스크롤을 위한 추가 데이터 로드
+    // 무한 스크롤 트리거 함수 (마지막 페이지거나 로딩 중이면 무시)
     func loadMoreBooksIfNeeded() {
         guard !isEnd, !isLoading, !lastQuery.isEmpty else { return }
         fetchBooks(query: lastQuery, page: currentPage + 1, isLoadMore: true)
