@@ -7,11 +7,6 @@
 
 import RxSwift
 
-//protocol SearchRepository {
-//    func searchBooks(query: String, page: Int) -> Single<BookResponse>
-//}
-
-
 protocol SearchRepository {
     /// 카카오 책 검색 API를 통해 책을 검색하는 함수
     /// - Parameters:query: 검색어, page: 페이지 번호

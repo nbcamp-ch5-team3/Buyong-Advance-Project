@@ -7,12 +7,6 @@
 
 import RxSwift
 
-//protocol RecentBooksRepository {
-//    func fetchAllBooks() -> [RecentBook]
-//    func saveBook(_ book: Book)
-//    func moveToFront(thumbnail: String)
-//}
-
 protocol RecentBooksRepository {
     /// UserDefaults에서 최근 본 모든 책을 조회하는 함수
     /// - Returns: 최근 본 책 목록

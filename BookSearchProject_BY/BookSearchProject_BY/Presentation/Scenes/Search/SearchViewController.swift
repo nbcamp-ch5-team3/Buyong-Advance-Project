@@ -137,7 +137,6 @@ extension Collection {
     }
 }
 
-
 extension SearchViewController: SearchViewDelegate {
     func searchView(_ searchView: SearchView, didSearch text: String) {
         searchVM.fetchBooks(query: text)
@@ -234,83 +233,6 @@ extension SearchViewController: UICollectionViewDelegate {
             }
         }
     }
-}
-
-extension SearchView: UICollectionViewDataSource {
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return SearchSection.allCases.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        switch SearchSection(rawValue: section) {
-        case .searchResults:
-            return max(searchResults.count, 1) /// 빈 상태일 때 1개
-        case .recentBooks:
-            return recentBooks.count
-        default:
-            return 0
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let section = SearchSection(rawValue: indexPath.section)
-        
-        switch section {
-        case .recentBooks:
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecentBookCell.id, for: indexPath) as? RecentBookCell else { return UICollectionViewCell()
-            }
-            
-            let book = recentBooks[indexPath.row]
-            cell.layer.cornerRadius = 40
-            cell.clipsToBounds = true
-            cell.configure(with: book.thumbnailImage)
-            return cell
-            
-        case .searchResults:
-            guard !searchResults.isEmpty else {
-                return collectionView.dequeueReusableCell(withReuseIdentifier: SearchEmptyStateCell.id, for: indexPath)
-            }
-            
-            guard let cell = collectionView.dequeueReusableCell(
-                withReuseIdentifier: SearchResultCell.id, for: indexPath
-            ) as? SearchResultCell else { return UICollectionViewCell()
-            }
-            
-            guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
-                print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
-                return UICollectionViewCell()
-            }
-            
-            let book = searchResults[indexPath.row]
-            cell.configure(with: book)
-            return cell
-            
-        case .none:
-            return UICollectionViewCell()
-        }
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        guard kind == UICollectionView.elementKindSectionHeader else {
-            fatalError("지원하지 않는 kind")
-        }
-        let sectionType = SearchSection.allCases[indexPath.section]
-        let headerView = collectionView.dequeueReusableSupplementaryView(
-            ofKind: kind,
-            withReuseIdentifier: SectionHeaderView.id,
-            for: indexPath
-        ) as! SectionHeaderView
-        
-        // recentBooks가 없으면 헤더 숨김
-        if sectionType == .recentBooks && recentBooks.isEmpty {
-            headerView.isHidden = true
-        } else {
-            headerView.isHidden = false
-            headerView.configure(title: sectionType.title)
-        }
-        return headerView
-    }
-    
 }
 
 extension SearchViewController: UISearchBarDelegate {

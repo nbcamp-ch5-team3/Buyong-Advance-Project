@@ -41,7 +41,6 @@ final class SearchView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setup()
-        reloadSearchResults()
     }
     
     required init?(coder: NSCoder) {
@@ -147,11 +146,6 @@ final class SearchView: UIView {
     }
     
     // MARK: - Private Methods
-    // 데이터 갱신 함수
-    private func reloadSearchResults() {
-        collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
-    }
-    
     private func reloadRecentBooks(oldBooks: [RecentBook], newBooks: [RecentBook]) {
         guard oldBooks.count == newBooks.count else { return }
         for i in 0..<newBooks.count {
@@ -173,8 +167,16 @@ final class SearchView: UIView {
     }
     
     func update(recentBooks: [RecentBook]) {
+        let oldBooks = self.recentBooks
         self.recentBooks = recentBooks
-        collectionView.reloadSections(IndexSet(integer: SearchSection.recentBooks.rawValue))
+        
+        if oldBooks.count == recentBooks.count {
+            // 개수가 같을 때는 변경된 아이템만 업데이트
+            reloadRecentBooks(oldBooks: oldBooks, newBooks: recentBooks)
+        } else {
+            // 개수가 다르면 섹션 전체 리로드
+            collectionView.reloadSections(IndexSet(integer: SearchSection.recentBooks.rawValue))
+        }
     }
     
     func setCollectionViewDelegate(_ delegate: UICollectionViewDelegate) {
@@ -183,5 +185,81 @@ final class SearchView: UIView {
     
     func setSearchBarDelegate(_ delegate: UISearchBarDelegate) {
         searchBar.delegate = delegate
+    }
+}
+
+extension SearchView: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return SearchSection.allCases.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        switch SearchSection(rawValue: section) {
+        case .searchResults:
+            return max(searchResults.count, 1) /// 빈 상태일 때 1개
+        case .recentBooks:
+            return recentBooks.count
+        default:
+            return 0
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let section = SearchSection(rawValue: indexPath.section)
+        
+        switch section {
+        case .recentBooks:
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: RecentBookCell.id, for: indexPath) as? RecentBookCell else { return UICollectionViewCell()
+            }
+            
+            let book = recentBooks[indexPath.row]
+            cell.layer.cornerRadius = 40
+            cell.clipsToBounds = true
+            cell.configure(with: book.thumbnailImage)
+            return cell
+            
+        case .searchResults:
+            guard !searchResults.isEmpty else {
+                return collectionView.dequeueReusableCell(withReuseIdentifier: SearchEmptyStateCell.id, for: indexPath)
+            }
+            
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: SearchResultCell.id, for: indexPath
+            ) as? SearchResultCell else { return UICollectionViewCell()
+            }
+            
+            guard indexPath.row < searchResults.count else { /// searchResults 접근 시 index 범위 검사
+                print("Invalid indexPath: \(indexPath.row), count: \(searchResults.count)")
+                return UICollectionViewCell()
+            }
+            
+            let book = searchResults[indexPath.row]
+            cell.configure(with: book)
+            return cell
+            
+        case .none:
+            return UICollectionViewCell()
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader else {
+            fatalError("지원하지 않는 kind")
+        }
+        let sectionType = SearchSection.allCases[indexPath.section]
+        let headerView = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: SectionHeaderView.id,
+            for: indexPath
+        ) as! SectionHeaderView
+        
+        // recentBooks가 없으면 헤더 숨김
+        if sectionType == .recentBooks && recentBooks.isEmpty {
+            headerView.isHidden = true
+        } else {
+            headerView.isHidden = false
+            headerView.configure(title: sectionType.title)
+        }
+        return headerView
     }
 }
