@@ -5,7 +5,7 @@
 //  Created by iOS study on 5/16/25.
 //
 
-final class DefaultRecentBooksRepository: RecentBooksRepository {
+final class RecentBooksRepositoryImpl: RecentBooksRepository {
     /// 최근 검색한 도서 데이터를 관리하는 매니저
     private let manager: RecentBookManager
     

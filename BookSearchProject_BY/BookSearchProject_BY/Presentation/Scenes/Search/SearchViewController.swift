@@ -17,11 +17,14 @@ protocol SearchViewDelegate: AnyObject {
     func searchView(_ searchView: SearchView, didSelectRecentBook recentBook: RecentBook)
 }
 
+
 final class SearchViewController: UIViewController {
+    
+    // MARK: - Properties
     private let searchView = SearchView()
-    private let searchVM = SearchViewModel()
+    private let searchVM: SearchViewModel
     private let disposeBag = DisposeBag()
-    private var shouldRefreshRecentBooksOnModalDismiss = true /// 갱신 플래그 추가
+    private var shouldRefreshRecentBooksOnModalDismiss = true
     
     // 서치바 외부 접근자 추가
     var searchBar: UISearchBar {
@@ -44,6 +47,17 @@ final class SearchViewController: UIViewController {
         }
     }
     
+    // MARK: - Initialization
+    /// 뷰 컨트롤러 초기화
+    init(searchVM: SearchViewModel = SearchViewModel()) {
+        self.searchVM = searchVM
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     // 화면이 보일때마다 최근 본 책 갱신
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -53,7 +67,7 @@ final class SearchViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setup()
-        bind()
+        bindViewModel()
         addKeyboardObserver()
     }
     
@@ -62,6 +76,8 @@ final class SearchViewController: UIViewController {
         removeKeyboardObserver()
     }
     
+    // MARK: - Setup
+    /// 초기 설정
     private func setup() {
         view.addSubview(searchView)
         setDelegate()
@@ -81,26 +97,38 @@ final class SearchViewController: UIViewController {
         }
     }
     
-    private func bind() {
-        // 2. VM의 책목록 -> VC의 데이터 갱신
+    // MARK: - Binding
+    /// 뷰모델 바인딩 설정
+    private func bindViewModel() {
+        bindSearchResults()
+        bindRecentBooks()
+        bindError()
+    }
+    
+    /// 검색 결과 바인딩
+    private func bindSearchResults() {
         searchVM.books
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] books in
                 self?.searchResults = books
             }).disposed(by: disposeBag)
-        
-        // 3. 에러처리
-        searchVM.error
-            .observe(on: MainScheduler.instance)
-            .subscribe(onNext: { error in
-                print("에러 발생: \(error)")
-            }).disposed(by: disposeBag)
-        
-        // 4. RecentBooks 데이터 바인딩
+    }
+    
+    /// 최근 본 책 바인딩
+    private func bindRecentBooks() {
         searchVM.recentBooks
             .observe(on: MainScheduler.instance)
             .subscribe(onNext: { [weak self] books in
                 self?.recentBooks = books
+            }).disposed(by: disposeBag)
+    }
+    
+    /// 에러 바인딩
+    private func bindError() {
+        searchVM.error
+            .observe(on: MainScheduler.instance)
+            .subscribe(onNext: { error in
+                print("에러 발생: \(error)")
             }).disposed(by: disposeBag)
     }
 }

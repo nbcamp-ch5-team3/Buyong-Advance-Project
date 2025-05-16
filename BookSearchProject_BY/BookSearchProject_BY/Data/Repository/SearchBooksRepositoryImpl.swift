@@ -9,7 +9,7 @@ import RxSwift
 import Alamofire
 
 /// 네트워크 요청을 처리하는 싱글톤 매니저
-final class DefaultSearchRepository: SearchRepository {
+final class SearchBooksRepositoryImpl: SearchRepository {
     private var networkManager: NetworkManaging
     private let apiKey: String
     

@@ -19,9 +19,12 @@ final class SearchViewModel {
     let recentBooks = BehaviorSubject(value: [RecentBook]())
     
     // MARK: - Initialization
-    init(searchUseCase: SearchBooksUseCase, recentBooksUseCase: RecentBooksUseCase) {
-        self.searchUseCase = searchUseCase
-        self.recentBooksUseCase = recentBooksUseCase
+    init() {
+        let searchRepository = SearchBooksRepositoryImpl()
+        let recentBooksRepository = RecentBooksRepositoryImpl()
+        
+        self.searchUseCase = SearchBooksUseCase(repository: searchRepository)
+        self.recentBooksUseCase = RecentBooksUseCase(repository: recentBooksRepository)
     }
     
     // MARK: - Search Methods

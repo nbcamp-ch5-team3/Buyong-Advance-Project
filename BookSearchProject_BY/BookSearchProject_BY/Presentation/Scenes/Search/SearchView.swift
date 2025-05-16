@@ -170,3 +170,22 @@ final class SearchView: UIView {
         }
     }
 }
+
+extension SearchView: SearchViewPresentation {
+    func updateSearchResults(_ books: [Book]) {
+        self.searchResults = books
+        reloadSearchResults()
+        books.isEmpty ? showEmptyState() : hideEmptyState()
+    }
+    
+    func updateRecentBooks(_ books: [RecentBook], oldBooks: [RecentBook]) {
+        self.recentBooks = books
+        reloadRecentBooks(oldBooks: oldBooks, newBooks: books)
+    }
+    
+    private func showEmptyState() {
+        searchResults = []
+        collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
+    }
+    
+}
