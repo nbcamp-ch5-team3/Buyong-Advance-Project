@@ -144,7 +144,7 @@ BookSearchProject_BY
 
 ---
 
-## 10. 참고 자료
+## 7. 참고 자료
 
 - [개인 노션 자료](https://daffodil-twist-1a4.notion.site/iOS-19e6b5542f2980d69684cfd775b8408d)
 - [카카오 책 검색 API 공식 문서](https://developers.kakao.com/docs/latest/ko/daum-search/dev-guide#search-book)
