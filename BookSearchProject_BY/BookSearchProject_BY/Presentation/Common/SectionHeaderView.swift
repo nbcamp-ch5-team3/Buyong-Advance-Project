@@ -9,13 +9,17 @@ import UIKit
 import Then
 
 final class SectionHeaderView: UICollectionReusableView {
+    
+    // MARK: - Properties
     static let id = "SectionHeaderView"
     
+    // MARK: - UI Components
     private let titleLabel = UILabel().then {
         $0.font = .systemFont(ofSize: 28, weight: .heavy)
         $0.textColor = .label
     }
     
+    // MARK: - Initialization
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -25,6 +29,7 @@ final class SectionHeaderView: UICollectionReusableView {
         fatalError( "init(coder:) has not been implemented" )
     }
     
+    // MARK: - Setup
     private func setupUI() {
         addSubview(titleLabel)
         titleLabel.snp.makeConstraints {

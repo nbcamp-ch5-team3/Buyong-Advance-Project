@@ -18,7 +18,6 @@ final class SavedBooksViewController: UIViewController {
     private let disposeBag = DisposeBag()
     
     // MARK: - Initialization
-    /// 뷰 컨트롤러 초기화
     init(savedBooksVM: SavedBooksViewModel = SavedBooksViewModel()) {
         self.savedBooksVM = savedBooksVM
         super.init(nibName: nil, bundle: nil)
@@ -28,7 +27,7 @@ final class SavedBooksViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Lifecycle
+    // MARK: - Life Cycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         savedBooksVM.fetchBooks()
@@ -172,23 +171,26 @@ final class SavedBooksViewController: UIViewController {
 }
 
 // MARK: - BookDetailModalDelegate
+/// 책 상세 모달에서 '담기' 버튼을 누르면 모달을 닫는 함수
 extension SavedBooksViewController: BookDetailModalDelegate {
     func didSaveBook(title: String, author: String, price: Int64, thumbnail: String?, contents: String?, isSaved: Bool) {
         dismiss(animated: true)
     }
     
+    /// 모달이 닫힐 때 호출되는 함수 (현재는 아무 동작 없음, SearchView에서 사용)
     func modalDidDismiss() {
     }
 }
 
 
 // MARK: - UITableViewDelegate
+/// 테이블뷰 셀을 왼쪽으로 스와이프할 때 '삭제' 액션을 제공하는 함수
 extension SavedBooksViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         // 빈 상태 셀일 경우 스와이프 비활성화
         guard !savedBooksVM.books.value.isEmpty else { return nil }
         
-        let deleteAction = UIContextualAction(style: .destructive, title: "") { [weak self] (action, view, completion) in
+        let deleteAction = UIContextualAction(style: .destructive, title: "삭제") { [weak self] (action, view, completion) in
             self?.savedBooksVM.deleteBook(at: indexPath.row)
             completion(true)
         }

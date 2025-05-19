@@ -55,6 +55,7 @@ final class SearchView: UIView {
         setupRegiserCells()
     }
     
+    /// 컬렉션뷰 셀 등록
     private func setupRegiserCells() {
         collectionView.register(RecentBookCell.self, forCellWithReuseIdentifier: RecentBookCell.id)
         collectionView.register(SearchEmptyStateCell.self, forCellWithReuseIdentifier: SearchEmptyStateCell.id)
@@ -146,6 +147,7 @@ final class SearchView: UIView {
     }
     
     // MARK: - Private Methods
+    /// 최근 본 책의 변경된 부분만 리로드 (최적화)
     private func reloadRecentBooks(oldBooks: [RecentBook], newBooks: [RecentBook]) {
         guard oldBooks.count == newBooks.count else { return }
         for i in 0..<newBooks.count {
@@ -157,15 +159,23 @@ final class SearchView: UIView {
     }
     
     // MARK: - Public Methods
+    /// delegate 설정
     func configure(delegate: SearchViewDelegate?) {
         self.delegate = delegate
     }
     
+    /// 컬렉션뷰 delegate 설정
+    func setCollectionViewDelegate(_ delegate: UICollectionViewDelegate) {
+        collectionView.delegate = delegate
+    }
+    
+    /// 검색 결과 데이터 갱신
     func update(searchResults: [Book]) {
         self.searchResults = searchResults
         collectionView.reloadSections(IndexSet(integer: SearchSection.searchResults.rawValue))
     }
     
+    /// 최근 본 책 데이터 갱신
     func update(recentBooks: [RecentBook]) {
         let oldBooks = self.recentBooks
         self.recentBooks = recentBooks
@@ -178,13 +188,11 @@ final class SearchView: UIView {
             collectionView.reloadSections(IndexSet(integer: SearchSection.recentBooks.rawValue))
         }
     }
-    
-    func setCollectionViewDelegate(_ delegate: UICollectionViewDelegate) {
-        collectionView.delegate = delegate
-    }
 }
 
+// MARK: - UICollectionViewDataSource 구현
 extension SearchView: UICollectionViewDataSource {
+    /// 섹션 개수 반환
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return SearchSection.allCases.count
     }
@@ -200,6 +208,7 @@ extension SearchView: UICollectionViewDataSource {
         }
     }
     
+    /// 셀 반환 (검색 결과, 최근 본 책, 빈 상태 셀)
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let section = SearchSection(rawValue: indexPath.section)
         
@@ -238,6 +247,7 @@ extension SearchView: UICollectionViewDataSource {
         }
     }
     
+    /// 섹션 헤더 반환
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader else {
             fatalError("지원하지 않는 kind")
