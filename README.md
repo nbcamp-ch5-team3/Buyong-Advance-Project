@@ -122,9 +122,15 @@ BookSearchProject_BY
 
 ## 5. 주요 기능 및 기기 별 출력 화면
 
-|  |  |  |
-| ![iPhone 16 Pro](https://github.com/user-attachments/assets/b9261e5d-2fc0-4539-8045-f62422041216) | ![iPad mini (A17 Pro)](https://github.com/user-attachments/assets/80072e23-3e52-42be-abca-08d69b677258) | ![iPhone SE (3rd generation)](https://github.com/user-attachments/assets/0f9f8a5a-7a05-4c4e-9dab-bf50947536d0) |
+| ![iPhone 16 Pro](https://github.com/user-attachments/assets/01e40540-c8ba-4b56-bda7-ac39d1e95dab) | ![iPad mini (A17 Pro)](https://github.com/user-attachments/assets/80072e23-3e52-42be-abca-08d69b677258) | ![iPhone SE (3rd generation)](https://github.com/user-attachments/assets/0f9f8a5a-7a05-4c4e-9dab-bf50947536d0) |
+| --- | --- | --- |
 | iPhone 16 Pro | iPad mini (A17 Pro) | iPhone SE (3rd generation) |
+| --- | --- | --- |
+|  |  |  |
+| --- | --- | --- |
+| 다크모드 기기 대응 | 무한스크롤 구현 | Modal 구현(책 저장 화면에서 버튼 비활성화) |
+
+
 
 ---
 
