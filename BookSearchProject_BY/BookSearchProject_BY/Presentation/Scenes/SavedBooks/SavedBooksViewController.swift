@@ -85,33 +85,36 @@ final class SavedBooksViewController: UIViewController {
     
     /// 테이블뷰 데이터 바인딩
     private func bindTableView() {
-        savedBooksVM.books
-            .bind(to: savedBooksView.tableView.rx.items) { [weak self] tableView, row, item in
-                guard let self = self else {
-                    return UITableViewCell()
-                }
-                
-                if self.savedBooksVM.books.value.isEmpty {
+        savedBooksVM.displayBooks
+            .bind(to: savedBooksView.tableView.rx.items) { tableView, row, item in
+                switch item {
+                case .empty:
                     let cell = tableView.dequeueReusableCell(withIdentifier: SavedEmptyStateCell.id, for: IndexPath(row: row, section: 0)) as! SavedEmptyStateCell
+                    cell.selectionStyle = .none
                     return cell
-                } else {
+                case .normal(let book):
                     let cell = tableView.dequeueReusableCell(withIdentifier: SavedBooksTableViewCell.id, for: IndexPath(row: row, section: 0)) as! SavedBooksTableViewCell
-                    cell.configure(with: item)
+                    cell.configure(with: book)
                     return cell
                 }
             }
             .disposed(by: disposeBag)
     }
+
     
     /// 테이블뷰 선택 이벤트 바인딩
     private func bindTableViewSelection() {
         savedBooksView.tableView.rx.itemSelected
-            .subscribe(onNext: { [weak self] indexPath in
-                guard let self = self,
-                      !self.savedBooksVM.books.value.isEmpty else { return }
-                
-                let book = self.savedBooksVM.books.value[indexPath.row]
-                self.showDetailModal(for: book)
+            .withLatestFrom(savedBooksVM.displayBooks) { ($0, $1) }
+            .subscribe(onNext: { [weak self] (indexPath, items) in
+                guard let self = self else { return }
+                let item = items[indexPath.row]
+                switch item {
+                case .normal(let book):
+                    self.showDetailModal(for: book)
+                case .empty:
+                    break // 아무 동작 없음
+                }
                 self.savedBooksView.tableView.deselectRow(at: indexPath, animated: true)
             })
             .disposed(by: disposeBag)
@@ -120,11 +123,16 @@ final class SavedBooksViewController: UIViewController {
     /// 테이블뷰 삭제 이벤트 바인딩
     private func bindTableViewDeletion() {
         savedBooksView.tableView.rx.itemDeleted
-            .subscribe(onNext: { [weak self] indexPath in
-                guard let self = self,
-                      !self.savedBooksVM.books.value.isEmpty else { return }
-                
-                self.savedBooksVM.deleteBook(at: indexPath.row)
+            .withLatestFrom(savedBooksVM.displayBooks) { ($0, $1) }
+            .subscribe(onNext: { [weak self] (indexPath, items) in
+                guard let self = self else { return }
+                let item = items[indexPath.row]
+                switch item {
+                case .normal:
+                    self.savedBooksVM.deleteBook(at: indexPath.row)
+                case .empty:
+                    break // 아무 동작 없음
+                }
             })
             .disposed(by: disposeBag)
     }

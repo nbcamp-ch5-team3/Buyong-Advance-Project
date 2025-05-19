@@ -15,9 +15,15 @@ final class SavedBooksViewModel {
     private let useCase: SavedBookUseCase
     private let disposeBag = DisposeBag()
     
-    // MARK: - Outputs (저장된 책 목록,  에러 메시지)
+    // MARK: - Outputs (저장된 책 목록,  에러 메시지, 데이터 스트림(빈 상태 구분)
     let books = BehaviorRelay<[Book]>(value: [])
     let showError = PublishRelay<String>()
+    var displayBooks: Observable<[BookCellType]> {
+        books
+            .map { books in
+                books.isEmpty ? [.empty] : books.map { .normal($0) }
+            }
+    }
     
     // MARK: - Initialization
     /// 뷰모델 초기화
