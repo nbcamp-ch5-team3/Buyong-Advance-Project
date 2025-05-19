@@ -126,9 +126,9 @@ BookSearchProject_BY
 | --- | --- | --- |
 | iPhone 16 Pro | iPad mini (A17 Pro) | iPhone SE (3rd generation) |
 | --- | --- | --- |
-|  |  |  |
+|![다크모드 대응](https://github.com/user-attachments/assets/fdfd103f-3d00-496c-bc23-8a35c4e9f788) | ![가로모드 대응](https://github.com/user-attachments/assets/8128be9e-eb3c-4efb-ae25-19be4a0ca200) | ![무한스크롤 구현](https://github.com/user-attachments/assets/e147438a-9b5b-4be0-8b0e-20a31cc735be) |
 | --- | --- | --- |
-| 다크모드 기기 대응 | 무한스크롤 구현 | Modal 구현(책 저장 화면에서 버튼 비활성화) |
+| 다크모드 대응 | 가로모드 대응 | 무한스크롤 구현 |
 
 
 
